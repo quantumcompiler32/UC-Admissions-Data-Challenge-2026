@@ -33,18 +33,23 @@ boundary.
 
 ## Analytical question status
 
-The organizer's event question is still pending. The accepted planning
-hypothesis is:
+The organizer's event question is still pending. Until it arrives, the team has
+confirmed this provisional question contract in the first grill round:
 
 > Which California public high-school sites show persistent above- or
 > below-baseline UC admission rates, and how do those deviations vary by campus
 > and year?
 
-This is not yet the final event question. When the prompt arrives, the team must
-run `grill-with-docs` again and confirm whether this direction remains suitable.
-Any selected question is descriptive and uses the provided expected baseline; it
-does not claim that school characteristics, campus practices, or policy changes
-cause the observed deviations.
+The comparison unit is one school site × one UC campus × one fall year. The main
+residual window is 2017–2025, with 2022 shown as a coverage gap. The population
+is the represented California public-high-school applicant records; campus rows
+are primary, while `Universitywide` is separate context. The metric is the
+applicant-weighted actual admission rate minus the provided expected admission
+rate, expressed in percentage points. This is not yet the final event question.
+When the prompt arrives, the team must run `grill-with-docs` again and confirm
+whether this direction remains suitable. Any selected question is descriptive
+and does not claim that school characteristics, campus practices, or policy
+changes cause the observed deviations.
 
 The evidence hierarchy puts persistent school-campus deviations first, with
 campus and year rollups as context. A “systematic” pattern is a directionally

@@ -28,8 +28,8 @@ destabilize dashboard correctness or require live network access at judging.
 
 | Lane | Primary owner | First responsibility | Shared output |
 | --- | --- | --- | --- |
-| Phase 1 evidence | Person 1: Data + Phase 1 evidence | Audit the completed answer ledger, formulas, filters, denominators, and verified metrics. | Reusable metric evidence and calculation notes. |
-| Dashboard Construction | Person 2: Dashboard + UX | Keep the Streamlit shell and data views ready, then run `grill-with-docs` immediately when the real dashboard question arrives. | Question-led dashboard and presentation path. |
+| Phase 1 evidence | Ranveer (Veer): Data + Phase 1 evidence | Own the completed answer ledger, formulas, filters, denominators, and verified metrics. | Reusable metric evidence and calculation notes. |
+| Dashboard Construction | Moksh: Dashboard + UX | Own the Streamlit shell and data views, then run `grill-with-docs` immediately when the real dashboard question arrives. | Question-led dashboard and presentation path. |
 | Gemini API | Person 1: Ranveer, with Person 3: Rathin supporting | Build one narrow AI capability with a deterministic non-API fallback and clear source context. | Gemini demo, source notes, fallback, and presentation evidence. |
 
 The three people should cross-review one another's numbers. The lane owner is
