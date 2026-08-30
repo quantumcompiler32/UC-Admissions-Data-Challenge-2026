@@ -3,7 +3,8 @@
 This plan incorporates the user-provided event card screenshot. It describes
 three challenge tracks and records that Phase 1 is complete:
 
-1. **Best Use of the Google Gemini API**: an optional focused AI-powered app.
+1. **Best Use of the Google Gemini API**: an intended focused AI-powered
+   companion capability, isolated from dashboard correctness.
 2. **UC Question Sprint — Phase 1 complete**: ten UC Admissions questions with
    numeric, auto-graded values. Reuse its answer ledger and verified metrics.
 3. **UC Dashboard Construction — current Phase 2 focus**: build a Streamlit
@@ -26,7 +27,7 @@ at judging.
 | --- | --- | --- | --- |
 | Phase 1 evidence | Person 1: Data + Phase 1 evidence | Audit the completed answer ledger, formulas, filters, denominators, and verified metrics. | Reusable metric evidence and calculation notes. |
 | Dashboard Construction | Person 2: Dashboard + UX | Keep the Streamlit shell and data views ready, then run `grill-with-docs` immediately when the real dashboard question arrives. | Question-led dashboard and presentation path. |
-| Gemini API | Person 3: Gemini + Presentation | Prototype one narrow AI use case with a deterministic non-API fallback and clear source context. | Optional AI demo plus final README/pitch support. |
+| Gemini API | Person 1: Ranveer, with Person 3: Rathin supporting | Build one narrow AI capability with a deterministic non-API fallback and clear source context. | Gemini demo, source notes, fallback, and presentation evidence. |
 
 The three people should cross-review one another's numbers. The lane owner is
 responsible for the decision and handoff, not the only person allowed to edit.
@@ -44,7 +45,9 @@ responsible for the decision and handoff, not the only person allowed to edit.
 - Prepare a minimal Streamlit shell that can be redirected after the grill; do
   not spend time polishing speculative charts.
 - Prepare a Gemini proof-of-concept boundary, but do not couple it to dashboard
-  startup or core calculations.
+  startup or core calculations. The intended capability is “Explain this view”:
+  Gemini summarizes a small, already-computed selection snapshot and its
+  limitations for a judge.
 
 ## When the Phase 2 dashboard question arrives
 
@@ -87,12 +90,22 @@ presentation check`
 
 ## Gemini API protocol
 
-Treat Gemini as an optional companion track. Choose one narrow capability such as
-plain-language explanation of a selected, already-computed view or question
-answering over documented fields. The app must show its source context, avoid
-inventing numbers, and have a non-Gemini fallback. Do not use Gemini to calculate
-the authoritative metrics or make the dashboard unusable when the API is
-unavailable.
+Use Gemini as a meaningful companion feature, not a generic chatbot. The first
+candidate is “Explain this view”:
+
+1. Deterministic Python code computes the selected view's rates, counts,
+   residuals, coverage, and limitations.
+2. The app sends Gemini only a small structured snapshot plus a constrained
+   instruction to explain the evidence in plain language.
+3. The response is displayed as an AI interpretation with the selected scope
+   and source fields visible beside it.
+4. The app validates the response shape, labels it as generated, and offers a
+   deterministic fallback when `GEMINI_API_KEY` is absent or the request fails.
+
+Do not use Gemini to calculate authoritative metrics, infer missing values, or
+make the dashboard unusable when the API is unavailable. Keep the API key in an
+environment variable, never commit it, and avoid sending the full dataset when
+a small aggregate snapshot is sufficient.
 
 ## End-of-event readiness gate
 

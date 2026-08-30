@@ -22,9 +22,9 @@ must not silently claim ownership.
 
 | Team slot | Combined role | Person | Agent handoff expectation |
 | --- | --- | --- | --- |
-| Person 1 | Technical + data lead: schema, joins, redaction, denominators, Phase 1 evidence, calculations, and technical infrastructure | Ranveer | Audit and reuse Phase 1 metrics; own reproducible calculations, data QA, and technical risk. |
+| Person 1 | Technical + data lead: schema, joins, redaction, denominators, Phase 1 evidence, calculations, technical infrastructure, and Gemini integration | Ranveer | Audit and reuse Phase 1 metrics; own reproducible calculations, data QA, Gemini adapter, and technical risk. |
 | Person 2 | Dashboard + UX lead: information architecture, interaction, accessibility, visual design, and final dashboard question | Moksh | Read `CONTEXT.md` and the UI/UX research before changing the visual system; own the Streamlit presentation path. |
-| Person 3 | Reproducibility + presentation support: README, sources, limitations, QA checklists, packaging, and bounded documentation tasks | Rathin | Keep evidence organized, complete clearly scoped tasks, and escalate analytical or technical decisions to the relevant owner. |
+| Person 3 | Reproducibility + presentation support: README, sources, limitations, QA checklists, packaging, Gemini demo notes, and bounded documentation tasks | Rathin | Keep evidence organized, document the Gemini demo and fallback, complete clearly scoped tasks, and escalate analytical or technical decisions to the relevant owner. |
 
 ### How to update the roster
 

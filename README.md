@@ -36,6 +36,11 @@ The planning defaults are:
 - `atp_code` as the school-site identity;
 - explicit missingness, redaction, `Universitywide`, and 2022 coverage rules.
 
+The intended Gemini feature is a source-grounded “Explain this view” companion:
+deterministic Python computes the numbers, and Gemini explains a selected
+aggregate snapshot. The dashboard must still run without `GEMINI_API_KEY` or
+network access.
+
 ## Collaboration
 
 Use GitHub Issues for decisions and specifications. Keep facts, hypotheses,

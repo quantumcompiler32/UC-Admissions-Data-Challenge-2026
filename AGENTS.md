@@ -49,8 +49,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 - Use the tracked `Data/` package as the shared data source. Do not depend on a
   personal Downloads path or silently substitute a different dataset.
 - Keep completed Phase 1 evidence, Phase 2 Dashboard Construction, and the
-  optional Gemini API track separate. The dashboard must remain useful without
-  a Gemini API key or live network access.
+  Gemini API track separate but coordinated. Gemini is an intended track entry,
+  not the source of authoritative metrics; the dashboard must remain useful
+  without a Gemini API key or live network access.
 - Keep claims descriptive. Do not imply that a residual, school attribute, or
   policy-era change causes an admission outcome.
 
