@@ -3,7 +3,7 @@
 import json
 import os
 from typing import Any, Dict, Optional, Protocol
-from urllib import request
+from urllib import error, request
 
 
 class ExplanationProvider(Protocol):
@@ -11,20 +11,42 @@ class ExplanationProvider(Protocol):
         ...
 
 
+class GeminiRequestError(Exception):
+    """Safe-to-display provider failure without request contents or secrets."""
+
+
 class GeminiClient:
     """Minimal Gemini REST client; the API key is read only from the environment."""
 
-    def __init__(self, api_key: str, timeout: float = 12.0) -> None:
+    def __init__(self, api_key: str, timeout: float = 12.0, model: Optional[str] = None) -> None:
         self.api_key = api_key
         self.timeout = timeout
+        self.model = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
     def generate(self, prompt: str) -> Any:
-        payload = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"responseMimeType": "application/json"}}
-        endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + self.api_key
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "responseSchema": {
+                    "type": "OBJECT",
+                    "properties": {"explanation": {"type": "STRING"}},
+                    "required": ["explanation"],
+                },
+            },
+        }
+        endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + self.model + ":generateContent"
         body = json.dumps(payload).encode("utf-8")
-        req = request.Request(endpoint, data=body, headers={"Content-Type": "application/json"}, method="POST")
-        with request.urlopen(req, timeout=self.timeout) as response:
-            document = json.loads(response.read().decode("utf-8"))
+        req = request.Request(endpoint, data=body, headers={"Content-Type": "application/json", "x-goog-api-key": self.api_key}, method="POST")
+        try:
+            with request.urlopen(req, timeout=self.timeout) as response:
+                document = json.loads(response.read().decode("utf-8"))
+        except error.HTTPError as exc:
+            raise GeminiRequestError(f"HTTP {exc.code}") from None
+        except error.URLError:
+            raise GeminiRequestError("network unavailable") from None
+        except TimeoutError:
+            raise GeminiRequestError("request timed out") from None
         return document["candidates"][0]["content"]["parts"][0]["text"]
 
 
@@ -86,6 +108,8 @@ def explain_view(snapshot: Dict[str, Any], provider: Optional[ExplanationProvide
         text = _valid_text(provider.generate(build_prompt(snapshot)))
     # Provider SDKs expose different exception classes; this boundary must
     # preserve the dashboard when any provider-side failure occurs.
+    except GeminiRequestError as exc:
+        return deterministic_explanation(snapshot, f"provider request failed ({exc})")
     except Exception:
         text = None
     if text is None:
