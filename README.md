@@ -27,6 +27,48 @@ Submission target: all three challenge categories shown in the event form.
 8. Review the selected dashboard question and completed grill in `CONTEXT.md`,
    then convert it into the implementation spec and tickets.
 
+## Run the Wave One dashboard
+
+```bash
+python3 -m pip install -r requirements.txt
+streamlit run app.py
+```
+
+The app uses tracked `Data/dashboard_data.csv` and does not require Gemini or
+network access. Run `python3 -m pytest -q` for the deterministic checks.
+
+For deployment, use Python 3.11 and the pinned `requirements.txt`. Streamlit
+Community Cloud can use `app.py` as its entrypoint. If `GEMINI_API_KEY` is not
+configured, “Explain this view” uses the deterministic local fallback and the
+core dashboard remains fully usable. A sample environment contract is in
+`.env.example`; never commit a real key.
+
+## Verified finding and methods
+
+The committed analysis reproduces 306 persistent campus-specific school
+combinations: 204 positive and 102 negative. A combination requires at least
+three residual years, at least 80% of yearly residuals on one side of zero, and
+agreement between that dominant direction and its pooled applicant-weighted
+residual. Actual rates use pooled admits/applicants; expected rates use the
+provided `expected_admit_rate` weighted by applicants.
+
+Residual-ready years are 2017–2021 and 2023–2025. Fall 2022 is explicitly
+“baseline unavailable.” Blank/redacted values are not zero-filled, and
+`Universitywide` is calculated as separate context rather than summed from
+campus rows. The result is descriptive aggregated evidence, not a causal,
+fairness, or individual-admission prediction.
+
+See [docs/QA-CHECKLIST.md](docs/QA-CHECKLIST.md) for automated and attended
+verification status and [docs/DEMO.md](docs/DEMO.md) for the judge path.
+
+## Reproducible analysis notebook
+
+[`notebooks/uc_persistent_gaps_colab.ipynb`](notebooks/uc_persistent_gaps_colab.ipynb)
+is a Colab-ready, self-contained analysis of the dashboard question. It uses
+Python/Pandas, preserves redacted values, excludes `Universitywide`, makes the
+2022 baseline gap explicit, reproduces the persistent-gap counts, and renders
+the zero-centered ranking plus campus/year context before the Streamlit app.
+
 ## Selected dashboard question
 
 > Among California public-high-school applicants represented in the data, which
