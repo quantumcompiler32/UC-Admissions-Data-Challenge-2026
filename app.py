@@ -176,7 +176,7 @@ p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
 .hero { background:linear-gradient(115deg,#fff 0%,#edf6ff 100%); border:1px solid #c8ddf5; border-left:8px solid var(--yellow); border-radius:18px; padding:1.25rem 1.45rem; margin:.5rem 0 1.15rem; }
 .eyebrow { color:var(--blue); font-size:.76rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
 .question { color:var(--ink); font-size:1.08rem; line-height:1.55; }
-.pill { display:inline-block; background:var(--yellow-soft); color:#735900; border:1px solid #f3d66c; border-radius:999px; padding:.23rem .62rem; font-size:.78rem; font-weight:700; margin:.25rem .2rem 0 0; }
+.pill { display:inline-block; background:var(--yellow); color:var(--ink); border:1px solid #dfa900; border-radius:999px; padding:.3rem .68rem; font-size:.78rem; font-weight:800; line-height:1.2; white-space:nowrap; margin:.25rem .2rem 0 0; }
 .finding-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; min-height:112px; }
 .finding-card strong { color:var(--blue); }
 @media (max-width:900px) {
