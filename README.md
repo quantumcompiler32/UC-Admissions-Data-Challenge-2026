@@ -15,14 +15,16 @@ Submission target: all three challenge categories shown in the event form.
    [docs/research/ui-ux-dashboard-skills.md](docs/research/ui-ux-dashboard-skills.md).
 3. Read [docs/REFERENCE-DECK.md](docs/REFERENCE-DECK.md) for the organizer
    slide-deck constraints.
-4. Read [Data/README.md](Data/README.md) before calculating or interpreting a
+4. Read [docs/GRILL-SUMMARY.md](docs/GRILL-SUMMARY.md) for the accepted
+   dashboard contract.
+5. Read [Data/README.md](Data/README.md) before calculating or interpreting a
    metric.
-5. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
+6. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
    invitations are pending acceptance, and verified GitHub handles should be
    added there afterward.
-6. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
+7. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
    and verified metrics.
-7. Review the selected dashboard question and completed grill in `CONTEXT.md`,
+8. Review the selected dashboard question and completed grill in `CONTEXT.md`,
    then convert it into the implementation spec and tickets.
 
 ## Selected dashboard question
@@ -42,16 +44,21 @@ The accepted design contract is:
 - `atp_code` as the school-site identity;
 - explicit missingness, redaction, `Universitywide`, and 2022 coverage rules.
 
+The exploratory audit found 306 persistent campus-specific school combinations:
+204 positive and 102 negative. This result remains provisional until committed
+analysis code and tests reproduce it. See
+[docs/research/persistent-gap-audit.md](docs/research/persistent-gap-audit.md).
+
 The intended Gemini feature is a source-grounded “Explain this view” companion:
 deterministic Python computes the numbers, and Gemini explains a selected
-aggregate snapshot. An optional Profile Context Explorer may summarize a
+aggregate snapshot. A secondary Profile Context Explorer may summarize a
 user-provided profile or resume and relate declared interests to school-level
 evidence, but it must not estimate individual admission odds. Profile data is
 temporary and requires explicit confirmation before transmission. The
 dashboard must still run without `GEMINI_API_KEY` or network access.
 
 The intended judge-facing sequence is dashboard finding, “Explain this view,”
-then the optional Profile Context Explorer.
+then the Profile Context Explorer if presentation time allows.
 
 The organizer deck's visible dashboard rubric is: question (time window,
 population, metric), concise and justifiable finding, nuanced and mature rigor,

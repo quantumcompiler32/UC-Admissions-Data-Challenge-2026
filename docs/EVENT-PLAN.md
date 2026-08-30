@@ -44,8 +44,8 @@ responsible for the decision and handoff, not the only person allowed to edit.
 - Keep the tracked `Data/` package and `Data/README.md` as the shared source.
 - Prepare reusable calculations for pooled rates, residuals, missingness,
   `Universitywide`, school-site identity, and coverage.
-- Prepare a minimal Streamlit shell that can be redirected after the grill; do
-  not spend time polishing speculative charts.
+- Build one narrative Streamlit page from `docs/GRILL-SUMMARY.md`; do not split
+  the core story across disconnected pages.
 - Deploy the minimal shell early enough to catch Streamlit deployment issues;
   the organizer deck explicitly warns not to wait until the last minute.
 - Prepare a Gemini proof-of-concept boundary, but do not couple it to dashboard
@@ -104,11 +104,20 @@ evidence. Low-volume or incomplete groups receive an explicit limited-evidence
 label; the dashboard does not imply inferential confidence without validated
 statistical methods.
 
+The default state shows all nine campuses, the full residual window, and the top
+10 positive and top 10 negative persistent gaps. `Universitywide` is separate
+context. “Limited evidence” means fewer than five residual years or fewer than
+100 pooled applicants; those results remain visible.
+
+Implement in three vertical slices: deterministic dashboard, Gemini “Explain
+this view,” then Profile Context Explorer. The deterministic first slice must
+remain fully useful when Gemini is unavailable.
+
 ## Gemini API protocol
 
-Use Gemini as a meaningful companion feature, not a generic chatbot. The first
-candidate is “Explain this view.” If time permits, an optional Profile Context
-Explorer can add a user-provided profile or resume path:
+Use Gemini as a meaningful companion feature, not a generic chatbot. The primary
+capability is “Explain this view.” A later Profile Context Explorer adds a
+user-provided profile or resume path:
 
 1. Deterministic Python code computes the selected view's rates, counts,
    residuals, coverage, and limitations.

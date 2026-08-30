@@ -33,7 +33,8 @@ The visual direction is **Residual Observatory**: an editorial evidence-led
 surface organized around a labeled zero line and a diverging residual scale.
 The expected rate is labeled as a provided baseline, not causal truth. A
 persistent pattern requires at least three residual years with at least 80% of
-observed residuals on the same side of zero, with applicant volume and coverage
+observed residuals on the same side of zero, and the pooled residual sign must
+agree with that dominant yearly direction. Applicant volume and coverage remain
 visible.
 
 ## Alternatives considered
@@ -54,5 +55,9 @@ visible.
   2005–2025 only for actual-rate context.
 - School identity uses `high_school + city` for display and `atp_code` for
   identity.
+- The default ranking shows the top 10 positive and top 10 negative persistent
+  gaps across all nine campuses. `Universitywide` remains separate context.
+- Results with fewer than five residual years or fewer than 100 pooled
+  applicants are labeled limited evidence, not excluded.
 - No visual or text treatment may imply causation, individual admission
   prediction, or a fairness verdict from the provided baseline.

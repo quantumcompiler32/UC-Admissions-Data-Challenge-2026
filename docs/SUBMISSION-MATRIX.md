@@ -7,7 +7,7 @@ contract rather than a guarantee of eligibility.
 
 | Category | Required evidence | Owner | Current status |
 | --- | --- | --- | --- |
-| Best Use of the Google Gemini API | A user-facing Gemini capability with a documented API call, source-grounded context, demo path, and fallback | Ranveer, with Rathin documenting the demo | Planned: “Explain this view”; optional Profile Context Explorer |
+| Best Use of the Google Gemini API | A user-facing Gemini capability with a documented API call, source-grounded context, demo path, and fallback | Ranveer, with Rathin documenting the demo | Planned: “Explain this view”; Profile Context Explorer as the third vertical slice |
 | UC Question Sprint | Completed ten numeric auto-graded answers plus the answer ledger, formulas, filters, and verification notes | Ranveer | Phase 1 complete; ledger still needs to be added to the shared repo if available |
 | UC Dashboard Construction | Streamlit app answering the selected question, with visible methodology, reproducible metrics, and presentation-ready startup | Moksh | Grill complete; ready for spec and implementation |
 

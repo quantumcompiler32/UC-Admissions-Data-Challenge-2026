@@ -14,6 +14,8 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
    three challenge categories.
 8. `docs/REFERENCE-DECK.md` for source facts transcribed from the organizer's
    slide deck and the decisions they informed.
+9. `docs/GRILL-SUMMARY.md` for the complete accepted dashboard contract and
+   implementation handoff.
 
 ## Current product status
 
@@ -42,9 +44,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   visual direction. Revisit them only if live organizer instructions conflict.
 - Keep the Admissions Ledger and Policy Timeline directions documented as
   alternatives; do not silently replace the accepted direction.
-- The grill is complete through the current decision frontier. Convert the
-  decisions into a spec and implementation tickets before building the final
-  dashboard.
+- The grill is complete. Use `docs/GRILL-SUMMARY.md` as the primary input to the
+  spec and implementation tickets; do not reopen settled product decisions
+  without new evidence or conflicting organizer instructions.
 
 ## Collaboration rules
 

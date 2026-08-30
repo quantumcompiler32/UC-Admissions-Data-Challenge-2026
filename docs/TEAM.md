@@ -59,6 +59,10 @@ GitHub Issue or commit message.
   and campus, with school-site detail retained.
 - Primary evidence: persistent school-campus deviations; campus/year rollups
   provide context.
+- Persistence: at least three residual years, at least 80% on one side of zero,
+  and agreement between the pooled residual sign and dominant yearly direction.
+- Limited evidence: fewer than five residual years or fewer than 100 pooled
+  applicants; label rather than exclude.
 - School labels: `high_school + city`, with `atp_code` available for identity
   and detail.
 - 2022: show an explicit “baseline unavailable” break; do not interpolate.

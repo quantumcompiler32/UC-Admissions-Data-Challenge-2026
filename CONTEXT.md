@@ -18,10 +18,10 @@ the denominator, comparison baseline, coverage, and limitations visible.
   required network or API-key dependency for the dashboard.
 
 The planned Gemini capabilities are a source-grounded “Explain this view”
-companion and, if time permits, an optional Profile Context Explorer. The
-Profile Context Explorer may summarize user-provided profile or resume text and
-relate declared interests to school-level dashboard evidence, but it does not
-estimate individual admission odds or probabilities.
+companion and a secondary Profile Context Explorer. The Profile Context Explorer
+may summarize user-provided profile or resume text and relate declared interests
+to school-level dashboard evidence, but it does not estimate individual
+admission odds or probabilities.
 
 ## Organizer deck constraints
 
@@ -59,11 +59,12 @@ not claim that school characteristics, campus practices, or policy changes cause
 the observed deviations.
 
 The primary pattern is persistence across years, not a single-year extreme.
-For this analysis, persistence means at least three residual years
-with at least 80% of observed residuals on the same side of zero. Rankings use
-pooled applicant-weighted residuals and are split into positive and negative
-patterns. No arbitrary applicant-volume cutoff is imposed; applicant volume
-and coverage are shown as evidence strength and limitation context.
+For this analysis, persistence means at least three residual years with at least
+80% of observed residuals on the same side of zero, and the pooled residual sign
+must agree with that dominant yearly direction. Rankings use pooled
+applicant-weighted residuals and are split into positive and negative patterns.
+No result is excluded solely for low applicant volume; applicant volume and
+coverage are shown as evidence strength and limitation context.
 
 In plain language, a persistent school-campus gap is a repeated difference for
 the same high-school site and UC campus between its actual admission rate and
@@ -100,7 +101,8 @@ and year rollups as context.
   expected rate, residual, applicants, admits, years observed, direction
   consistency, and a year-by-year trend.
 - Evidence strength: applicant count, years observed, and coverage remain
-  visible; limited evidence is labeled rather than hidden or overstated.
+  visible. “Limited evidence” means fewer than five residual years or fewer than
+  100 pooled applicants; the result remains visible.
 - Profile data: optional, temporary, and transmitted to Gemini only after the
   user explicitly confirms. Contact details and unnecessary personal data are
   excluded, and the profile is not stored in the repository.
@@ -132,9 +134,10 @@ and year rollups as context.
 - Aggregate actual and expected rates use applicant weighting: expected admits
   are calculated as applicants × provided expected rate, then pooled before
   dividing. Residual is pooled actual rate minus pooled expected rate.
-- A persistent pattern requires at least three residual years with at least 80%
-  of observed residuals on the same side of zero. Applicant volume and coverage
-  remain visible; no arbitrary small-school cutoff has been selected.
+- A persistent pattern requires at least three residual years, at least 80% of
+  observed residuals on the same side of zero, and agreement between that
+  dominant direction and the pooled residual sign. Applicant volume and coverage
+  remain visible; no small-school exclusion cutoff is applied.
 - School labels are displayed as `high_school + city`; `atp_code` remains the
   internal identity and is available in detail views.
 - The 2022 residual gap is shown as “baseline unavailable”; it is never
@@ -151,8 +154,12 @@ and year rollups as context.
   rate, expressed in percentage points where both values are available.
 - **Persistent school-campus gap**: an admission-rate residual observed for the
   same school site and campus in at least three residual years, with at least
-  80% of observed residuals on the same side of zero. Avoid “systematic gap,”
-  which can imply causation or an institutional mechanism not established here.
+  80% of observed residuals on the same side of zero and the pooled residual
+  sign agreeing with that dominant direction. Avoid “systematic gap,” which can
+  imply causation or an institutional mechanism not established here.
+- **Limited evidence**: a visible qualification for a persistent school-campus
+  gap with fewer than five residual years or fewer than 100 pooled applicants.
+  It is a warning, not an exclusion rule.
 - **Positive gap**: a positive residual; the observed actual admission rate is
   above the provided expected rate.
 - **Negative gap**: a negative residual; the observed actual admission rate is
