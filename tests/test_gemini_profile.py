@@ -1,4 +1,7 @@
-from gemini import deterministic_explanation, explain_view
+from unittest.mock import patch
+from urllib.error import HTTPError
+
+from gemini import GeminiClient, deterministic_explanation, explain_view
 from profile import build_redacted_payload, clear_profile_payload, explain_profile, is_prohibited_profile_request
 
 
@@ -30,6 +33,17 @@ def test_explanation_malformed_failure_timeout_and_missing_key_fallback():
     assert explain_view(SNAPSHOT, FakeProvider(error=RuntimeError("network")))["source"] == "Deterministic offline fallback"
     assert explain_view(SNAPSHOT, None)["source"] == "Deterministic offline fallback"
     assert deterministic_explanation(SNAPSHOT)["text"]
+
+
+def test_gemini_http_failure_exposes_safe_status_only():
+    with patch("gemini.request.urlopen", side_effect=HTTPError("https://example.invalid", 400, "bad key", {}, None)):
+        try:
+            GeminiClient("replacement-not-used-in-test").generate("snapshot")
+        except Exception as error:
+            assert str(error) == "HTTP 400"
+            assert "replacement" not in str(error)
+        else:
+            raise AssertionError("expected provider failure")
 
 
 def test_profile_redacts_contacts_requires_confirmation_and_can_clear():
