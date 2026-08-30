@@ -24,8 +24,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 - The team is preparing for Phase 2 implementation. The organizer deck directs
   teams to develop their own question, and this team's question is settled in
   `CONTEXT.md`.
-- The dashboard and Question Sprint remain active submission paths. Gemini UI
-  has been removed and that award path is not currently presentation-ready.
+- The dashboard and Question Sprint remain active submission paths. The
+  optional Gemini award path is presentation-ready through a source-bounded
+  explanation action with a deterministic fallback.
 - The organizer deck says the Question Sprint and Dashboard are each 50% of
   the score. The dashboard question must specify a time window, population,
   and metric; the answer should be worked out reproducibly before building
@@ -57,8 +58,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   `Universitywide` as the sum of campus rows.
 - Use the tracked `Data/` package as the shared data source. Do not depend on a
   personal Downloads path or silently substitute a different dataset.
-- Keep completed Phase 1 evidence and Phase 2 Dashboard Construction separate.
-  Do not claim Gemini eligibility while no user-facing Gemini capability exists.
+- Keep completed Phase 1 evidence, Phase 2 Dashboard Construction, and the
+  optional Gemini API track separate but coordinated. The dashboard must remain
+  useful without a Gemini API key or live network access.
 - Keep claims descriptive. Do not imply that race, ethnicity, school
   characteristics, major, GPA, or policy caused an admission outcome.
 

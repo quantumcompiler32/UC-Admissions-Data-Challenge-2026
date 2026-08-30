@@ -17,7 +17,12 @@ Target length: 2–3 minutes.
 7. Open GPA & major context. Switch to Berkeley transfer major, select one
    named major, show the admitted/enrolled GPA ranges, and demonstrate the GPA
    range comparison. State that it is context, not a probability.
-8. End in Methods with the count-derived formulas and the descriptive,
+8. Return to Overview, choose a reported-group scope, expand “Show the source
+   snapshot,” and click “Explain this view.” If `GEMINI_API_KEY` is configured,
+   show the labeled Gemini interpretation; otherwise show the deterministic
+   fallback. Point out that the displayed dashboard cards and selected-group
+   snapshot counts and rates remain authoritative.
+9. End in Methods with the count-derived formulas and the descriptive,
    non-causal boundary.
 
 Do not spend judge time on the Historical explorer unless asked. It is a useful

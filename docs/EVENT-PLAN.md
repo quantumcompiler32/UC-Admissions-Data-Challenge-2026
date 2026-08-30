@@ -6,9 +6,8 @@
    formulas, filters, and organizer confirmation status.
 2. **UC Dashboard Construction:** active; present the ethnicity outcomes
    dashboard defined in `CONTEXT.md` and ADR-0003.
-3. **Best Use of Gemini:** inactive because the user-facing Gemini UI was
-   removed. Do not select or present this category unless a tested feature is
-   deliberately restored.
+3. **Best Use of Gemini:** active as an optional source-bounded explanation
+   action in the Overview tab, with a deterministic offline fallback.
 
 ## Ownership
 

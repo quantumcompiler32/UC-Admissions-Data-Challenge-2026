@@ -82,7 +82,10 @@ criteria into a personal result.
 
 - Question Sprint evidence remains preserved separately.
 - The ethnicity dashboard and Historical Admissions Benchmark are implemented.
-- Gemini UI has been removed. Adapter code and tests remain, but the Gemini
-  award path is not currently presentation-ready.
+- An optional source-bounded Gemini explanation is available from the Overview
+  tab. It reads `GEMINI_API_KEY` from the environment, sends only the selected
+  aggregate snapshot, and falls back to a deterministic local explanation when
+  the key or network is unavailable. The dashboard remains fully useful
+  without Gemini.
 - The former persistent residual dashboard is superseded and retained only as
   archived analysis code, tests, notebook, research notes, and ADR history.

@@ -8,7 +8,7 @@
 - Repository account: `quantumcompiler32`
 - Human team size: three people
 - GitHub collaborator invitations: sent; acceptance is pending
-- Submission target: Dashboard and Question Sprint active; Gemini inactive
+- Submission target: Dashboard, Question Sprint, and optional Gemini active
 
 The repository account is not assumed to identify a specific human. Team names
 are recorded below; GitHub handles remain unassigned until collaborator

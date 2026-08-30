@@ -29,6 +29,7 @@ Historical explorer, and Methods sections.
 - The former residual analysis remains archived, not deleted.
 - The primary notebook, README, demo, and QA evidence must refer to the ethnicity
   question.
-- Gemini UI is absent and the Gemini award path is not presentation-ready.
+- The Gemini award path is an optional, source-bounded “Explain this selected
+  view” action with a deterministic fallback when the key or network is absent.
 - The presentation must distinguish descriptive group outcomes from causal or
   fairness claims and keep counts beside rates.

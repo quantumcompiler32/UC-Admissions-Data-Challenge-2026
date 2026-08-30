@@ -26,16 +26,19 @@ requirements.
 These files preserve the previous school-campus residual investigation. They do
 not control the current app or presentation.
 
-## Inactive Gemini work
+## Gemini paths
 
-- `gemini.py`
-- `profile.py`
-- `tests/test_gemini_profile.py`
-- `docs/adr/0002-streamlit-dashboard-with-gemini-companion.md`
+- `gemini.py` and `tests/test_gemini_profile.py` are the current bounded Gemini
+  explanation boundary.
+- `profile.py` remains historical profile-guardrail work and is not connected
+  to the current judge-facing app.
+- `gemini_adapter.py` and `tests/test_gemini_adapter.py` are residual-specific
+  historical work and are not used by the current ethnicity dashboard.
+- `docs/adr/0002-streamlit-dashboard-with-gemini-companion.md` records the
+  earlier residual design and remains historical context.
 
-The user-facing Gemini interface was removed. The code remains as historical
-work, but the repository must not be submitted for a Gemini award unless a
-tested user-facing capability is deliberately restored.
+The current user-facing Gemini action is documented in `docs/DEMO.md` and must
+remain optional, source-grounded, and safe without an API key.
 
 ## Archived implementation prompts
 

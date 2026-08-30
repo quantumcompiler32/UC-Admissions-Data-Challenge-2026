@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 from urllib.error import HTTPError
 
@@ -21,6 +22,20 @@ class FakeProvider:
 SNAPSHOT = {"scope": {"campus": "Berkeley"}, "metrics": {"direction": "positive", "actual_rate": .6, "provided_expected_rate": .5, "residual_percentage_points": 10.0, "years_observed": 4, "direction_consistency": 1.0, "limited_evidence": False}}
 
 
+class FakeHTTPResponse:
+    def __init__(self, document):
+        self.document = document
+
+    def read(self):
+        return json.dumps(self.document).encode("utf-8")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
 def test_explanation_success_uses_validated_fake_and_only_snapshot_prompt():
     provider = FakeProvider('{"explanation":"The actual rate is above the provided baseline in this observed selection."}')
     result = explain_view(SNAPSHOT, provider)
@@ -35,6 +50,17 @@ def test_explanation_malformed_failure_timeout_and_missing_key_fallback():
     assert deterministic_explanation(SNAPSHOT)["text"]
 
 
+def test_explanation_rejects_unsafe_individual_and_fairness_claims():
+    for unsafe in (
+        "This applicant will be admitted.",
+        "This pattern proves a fairness verdict.",
+        "This group has a 70% probability of admission.",
+        "White is likely to be admitted and the outcome is inequitable.",
+    ):
+        result = explain_view(SNAPSHOT, FakeProvider(json.dumps({"explanation": unsafe})))
+        assert result["source"] == "Deterministic offline fallback"
+
+
 def test_gemini_http_failure_exposes_safe_status_only():
     with patch("gemini.request.urlopen", side_effect=HTTPError("https://example.invalid", 400, "bad key", {}, None)):
         try:
@@ -44,6 +70,82 @@ def test_gemini_http_failure_exposes_safe_status_only():
             assert "replacement" not in str(error)
         else:
             raise AssertionError("expected provider failure")
+
+
+def test_gemini_interactions_request_is_stateless_and_extracts_text():
+    document = {
+        "steps": [
+            {
+                "type": "model_output",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": '{"explanation":"The selected view is above the provided baseline."}',
+                    }
+                ],
+            }
+        ]
+    }
+    with patch("gemini.request.urlopen", return_value=FakeHTTPResponse(document)) as urlopen:
+        raw = GeminiClient("secret-value", model="gemini-3.7-flash").generate("snapshot")
+
+    request_object = urlopen.call_args.args[0]
+    payload = json.loads(request_object.data.decode("utf-8"))
+    assert request_object.full_url.endswith("/v1beta/interactions")
+    assert payload["store"] is False
+    assert payload["model"] == "gemini-3.7-flash"
+    assert payload["response_format"]["mime_type"] == "application/json"
+    assert payload["generation_config"] == {
+        "thinking_level": "low",
+        "max_output_tokens": 180,
+    }
+    assert raw == '{"explanation":"The selected view is above the provided baseline."}'
+
+
+def test_ethnicity_view_fallback_is_useful_without_gemini():
+    snapshot = {
+        "scope": {
+            "pathway": "Freshman",
+            "campus": "Systemwide",
+            "year": 2025,
+            "metric": "Admission rate",
+        },
+        "metrics": {
+            "applicants": 1000,
+            "admits": 420,
+            "admission_rate": 0.42,
+            "enrollees": 210,
+            "yield_rate": 0.5,
+        },
+        "rows": [
+            {"reported_group": "Asian", "metric_value": 0.55},
+            {"reported_group": "White", "metric_value": 0.35},
+        ],
+    }
+
+    text = deterministic_explanation(snapshot)["text"]
+
+    assert "Freshman" in text
+    assert "Systemwide" in text
+    assert "Admission rate" in text
+    assert "42.0%" in text
+
+
+def test_ethnicity_gemini_text_must_name_selected_evidence_and_use_known_numbers():
+    snapshot = {
+        "scope": {"metric": "Admission rate"},
+        "metrics": {"admission_rate": 0.42},
+        "rows": [{"reported_group": "White", "metric_value": 0.35}],
+    }
+    valid = FakeProvider(
+        '{"explanation":"For the selected Admission rate view, White is the selected reported group at 35.0%."}'
+    )
+    fabricated = FakeProvider(
+        '{"explanation":"For the selected Admission rate view, White is the selected reported group at 99.0%."}'
+    )
+
+    assert explain_view(snapshot, valid)["source"] == "Gemini generated interpretation"
+    assert explain_view(snapshot, fabricated)["source"] == "Deterministic offline fallback"
 
 
 def test_profile_redacts_contacts_requires_confirmation_and_can_clear():

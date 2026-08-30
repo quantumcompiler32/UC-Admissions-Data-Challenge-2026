@@ -32,6 +32,25 @@ python3 -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## Optional Gemini explanation
+
+Create a local `.env` beside `app.py`, then start Streamlit:
+
+```bash
+# Copy the template, then edit .env and set GEMINI_API_KEY='your-key-here'
+cp .env.example .env
+streamlit run app.py
+```
+
+The app automatically reads the root `.env`; an already-exported environment
+variable takes priority. `.env` is ignored by Git, so every teammate who
+clones the repository creates their own local file and uses their own key.
+The Overview tab provides one **Explain this selected view** action. Gemini
+receives only the current aggregate scope and returns commentary; the app keeps
+all counts and rates deterministic. If the key is absent or the request fails,
+the same button shows a local explanation and the dashboard remains usable.
+Never commit or paste the key into the repository.
+
 Run deterministic checks with:
 
 ```bash
@@ -107,11 +126,11 @@ should be interpreted with their counts visible.
 - `CONTEXT.md` and `docs/GRILL-SUMMARY.md`: accepted product contract
 - `docs/PRESENTATION-SPEECH.md`: judge-facing presentation script
 - `docs/QUESTION-SPRINT-LEDGER.md`: preserved Phase 1 evidence
-- `docs/ARCHIVE.md`: map of superseded residual and inactive Gemini artifacts
+- `docs/ARCHIVE.md`: map of superseded residual artifacts and current Gemini path
 
 The former persistent residual analysis remains archived in `analysis.py`, its
 tests, notebook, research note, and superseded ADR. It is not the current
 dashboard question.
 
-Gemini UI has been removed. Adapter code remains in the repository, but the
-Gemini award path is not currently presentation-ready.
+The optional Gemini explanation is restored in `app.py` through `gemini.py`.
+The older residual-specific adapter remains tracked as historical work.

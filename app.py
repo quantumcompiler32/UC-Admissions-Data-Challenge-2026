@@ -1,5 +1,6 @@
 """Judge-facing Streamlit app for the UC admissions ethnicity question."""
 
+from numbers import Number
 from pathlib import Path
 
 import pandas as pd
@@ -11,6 +12,7 @@ from ethnicity_analysis import (
     METRIC_LABELS, aggregate_scope, campus_matrix, change_findings,
     filter_metrics, load_ethnicity_data, prepare_ethnicity_metrics,
 )
+from gemini import client_from_environment, explain_view
 
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "Data"
@@ -44,6 +46,106 @@ def change_sentence(finding: dict) -> str:
         f"{finding['decrease_group']} increased least ({decrease:+.2f} pp)."
     )
     return f"{finding['increase_group']} increased most ({finding['increase_pp']:+.2f} pp); {second}"
+
+
+def _snapshot_value(value):
+    if value is None or pd.isna(value):
+        return None
+    if isinstance(value, Number) and not isinstance(value, bool):
+        return float(value)
+    return str(value)
+
+
+def build_gemini_snapshot(
+    active: pd.DataFrame,
+    *,
+    pathway_label: str,
+    campus: str,
+    selected_year: int,
+    selected_metric: str,
+    selected_groups: list[str],
+) -> dict:
+    """Build a small, JSON-safe snapshot for the optional explanation action."""
+    scoped = active[active["ethnicity"].isin(selected_groups)]
+    scoped_totals = aggregate_scope(scoped)
+    rows = []
+    for row in scoped[["ethnicity", "applicants", "admits", "enrollees", selected_metric]].to_dict("records"):
+        rows.append(
+            {
+                "reported_group": _snapshot_value(row["ethnicity"]),
+                "applicants": _snapshot_value(row["applicants"]),
+                "admits": _snapshot_value(row["admits"]),
+                "enrollees": _snapshot_value(row["enrollees"]),
+                "metric_value": _snapshot_value(row[selected_metric]),
+            }
+        )
+    return {
+        "scope": {
+            "pathway": pathway_label,
+            "campus": campus,
+            "year": int(selected_year),
+            "metric": METRIC_LABELS[selected_metric],
+            "reported_groups": selected_groups,
+        },
+        "metrics": {
+            "applicants": _snapshot_value(scoped_totals["applicants"]),
+            "admits": _snapshot_value(scoped_totals["admits"]),
+            "admission_rate": _snapshot_value(scoped_totals["admission_rate"]),
+            "enrollees": _snapshot_value(scoped_totals["enrollees"]),
+            "yield_rate": _snapshot_value(scoped_totals["yield_rate"]),
+        },
+        "rows": rows,
+        "source": "Data/uc_admissions_summary_by_ethnicity.csv",
+        "limitations": [
+            "This is aggregated descriptive evidence, not individual applicant data.",
+            "Systemwide is a supplied aggregate and is not reconstructed from campus rows.",
+            "Reported categories and missing counts are preserved as supplied.",
+        ],
+    }
+
+
+def render_gemini_explainer(
+    active: pd.DataFrame,
+    *,
+    pathway_label: str,
+    campus: str,
+    selected_year: int,
+    selected_metric: str,
+    selected_groups: list[str],
+) -> None:
+    """Render a single judge-friendly Gemini action with an offline fallback."""
+    st.subheader("Explain this selected view")
+    st.caption(
+        "Gemini explains the selected aggregate scope; Python remains the "
+        "source of every displayed metric."
+    )
+    snapshot = build_gemini_snapshot(
+        active,
+        pathway_label=pathway_label,
+        campus=campus,
+        selected_year=selected_year,
+        selected_metric=selected_metric,
+        selected_groups=selected_groups,
+    )
+    with st.expander("Show the source snapshot", expanded=False):
+        st.json(snapshot)
+    provider = client_from_environment()
+    if provider is None:
+        st.caption("Offline fallback is ready. Set GEMINI_API_KEY in the environment to enable live Gemini.")
+    else:
+        st.caption("Gemini is configured. Click the button to generate a source-grounded explanation.")
+    if st.button("Explain this view", type="primary", key="explain_selected_view"):
+        with st.spinner("Preparing a grounded explanation…"):
+            result = explain_view(snapshot, provider)
+        if result["source"] == "Gemini generated interpretation":
+            st.success("Gemini-generated interpretation")
+        else:
+            st.info("Deterministic local explanation (Gemini unavailable)")
+        st.markdown(result["text"])
+        st.caption(
+            "Generated commentary is not an additional metric or prediction. "
+            "The dashboard cards and selected-group snapshot are computed in Python."
+        )
 
 
 st.set_page_config(page_title="UC Admissions: Representation, Admission & Enrollment", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
@@ -84,7 +186,7 @@ with st.sidebar:
     selected_year = st.select_slider("Fall year", years, value=max(years))
     selected_metric = st.selectbox("Metric", list(METRIC_LABELS), format_func=lambda value: METRIC_LABELS[value], index=1)
     default_groups = ["African American", "Asian", "Hispanic/Latino(a)", "White"]
-    selected_groups = st.multiselect("Reported groups", GROUP_ORDER, default=default_groups)
+    selected_groups = st.multiselect("Reported groups", GROUP_ORDER, default=default_groups, key="dashboard_reported_groups")
     if not selected_groups:
         selected_groups = GROUP_ORDER
     st.divider()
@@ -140,6 +242,14 @@ with overview_tab:
     st.bar_chart(year_rows[[selected_metric]].rename(columns={selected_metric: METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
     display = active[["ethnicity", "applicants", "admits", "enrollees", "application_share", "admission_rate", "yield_rate"]].sort_values(selected_metric, ascending=False)
     st.dataframe(display.rename(columns={"ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees","application_share":"Application share","admission_rate":"Admission rate","yield_rate":"Enrollment yield"}), hide_index=True, width="stretch", column_config={"Application share":st.column_config.NumberColumn(format="%.1f%%"),"Admission rate":st.column_config.NumberColumn(format="%.1f%%"),"Enrollment yield":st.column_config.NumberColumn(format="%.1f%%")})
+    render_gemini_explainer(
+        active,
+        pathway_label=pathway_label,
+        campus=campus,
+        selected_year=selected_year,
+        selected_metric=selected_metric,
+        selected_groups=selected_groups,
+    )
 
 with trends_tab:
     st.subheader(f"{METRIC_LABELS[selected_metric]} over time")
