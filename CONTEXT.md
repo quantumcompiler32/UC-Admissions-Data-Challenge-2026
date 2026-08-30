@@ -85,6 +85,14 @@ consistent residual across at least three observed years.
   immediately, with the time window, population, and metric visible.
 - Supporting flow: campus/year context followed by clickable school-campus
   detail; Policy Timeline remains context rather than the primary story.
+- Controls: campus, year, positive/negative gap, and school filters are
+  exploratory; the persistence rule remains fixed and visible.
+- Gemini flow: the dashboard finding comes first, “Explain this view” is the
+  primary Gemini action, and Profile Context Explorer is a secondary,
+  time-permitting demo.
+- Profile input: a structured form plus optional pasted resume text; the user
+  confirms before transmission, contact details are removed, and the data is
+  not stored.
 - Profile data: optional, temporary, and transmitted to Gemini only after the
   user explicitly confirms. Contact details and unnecessary personal data are
   excluded, and the profile is not stored in the repository.

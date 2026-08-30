@@ -121,6 +121,9 @@ be opt-in, require explicit confirmation before sending text to Gemini, avoid
 contact details and unnecessary personal information, and avoid persistent
 storage of the profile.
 
+For the judge-facing demo, present the dashboard finding first, “Explain this
+view” second, and the Profile Context Explorer only if time permits.
+
 Do not use Gemini to calculate authoritative metrics, infer missing values, or
 make the dashboard unusable when the API is unavailable. Keep the API key in an
 environment variable, never commit it, and avoid sending the full dataset when

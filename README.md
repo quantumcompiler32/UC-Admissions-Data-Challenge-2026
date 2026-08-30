@@ -48,6 +48,9 @@ evidence, but it must not estimate individual admission odds. Profile data is
 temporary and requires explicit confirmation before transmission. The
 dashboard must still run without `GEMINI_API_KEY` or network access.
 
+The intended judge-facing sequence is dashboard finding, “Explain this view,”
+then the optional Profile Context Explorer.
+
 The organizer deck's visible dashboard rubric is: question (time window,
 population, metric), concise and justifiable finding, nuanced and mature rigor,
 accurate and reliable dashboard, and well-understood presentation. See
