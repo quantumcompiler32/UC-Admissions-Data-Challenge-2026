@@ -20,9 +20,9 @@ Agents may assist any owner but must not silently claim ownership.
 
 | Team slot | Combined role | Person | Agent handoff expectation |
 | --- | --- | --- | --- |
-| Person 1 | Data + analysis lead: schema, joins, redaction, denominators, question sprint, and interpretation | TBD | Record field definitions, coverage checks, reproducible calculations, and claim boundaries. |
+| Person 1 | Data + Phase 1 evidence lead: schema, joins, redaction, denominators, sprint answer ledger, and interpretation | TBD | Audit and reuse Phase 1 metrics; record field definitions, coverage checks, reproducible calculations, and claim boundaries. |
 | Person 2 | Dashboard + UX lead: information architecture, interaction, accessibility, and visual design | TBD | Read `CONTEXT.md` and the UI/UX research before changing the visual system. |
-| Person 3 | Reproducibility + presentation lead: README, sources, limitations, launch instructions, and final pitch | TBD | Preserve evidence for every presented number and limitation. |
+| Person 3 | Gemini API + presentation lead: focused AI-app experiment, README, sources, limitations, launch instructions, and final pitch | TBD | Keep the Gemini experiment isolated and preserve evidence for every presented number and limitation. |
 
 ### How to update the roster
 
@@ -60,7 +60,7 @@ GitHub Issue or commit message.
 
 ### Still open
 
-- The organizer's event question has not arrived. Run `grill-with-docs` when it
+- The Phase 2 dashboard question has not arrived. Run `grill-with-docs` when it
   does, before building the final dashboard.
 - The construction and provenance of `expected_admit_rate` are not documented
   in the supplied data README. Until clarified, label it as a provided
@@ -87,11 +87,14 @@ primary claim.
 1. Add the three teammates' names and GitHub handles to this file.
 2. Confirm every teammate can clone, create a branch, and open/push a test
    change.
-3. When the organizer's question arrives, run `grill-with-docs` and update
-   `CONTEXT.md`/ADRs with the question-specific decisions.
-4. Convert the confirmed design into a small spec and GitHub Issues before
-   implementation.
-5. Build one vertical slice test-first, then verify the data calculations,
+3. At Phase 2 start, split into the Dashboard and optional Gemini API lanes;
+   have Person 1 audit the completed Phase 1 evidence and share definitions and
+   findings through the repo.
+4. When the organizer's dashboard question arrives, run `grill-with-docs` and
+   update `CONTEXT.md`/ADRs with the question-specific decisions.
+5. Convert the confirmed dashboard design into a small spec and GitHub Issues
+   before implementation.
+6. Build one vertical slice test-first, then verify the data calculations,
    accessibility, responsive layout, cold start, and presentation path.
 
 ## Agent handoff protocol

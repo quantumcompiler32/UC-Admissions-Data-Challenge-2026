@@ -6,6 +6,17 @@ This dashboard is a competition presentation for judges and generalist data
 reviewers. It will answer one descriptive analytical question clearly and make
 the denominator, comparison baseline, coverage, and limitations visible.
 
+## Event tracks
+
+- **Question Sprint**: ten UC Admissions data questions with numeric,
+  auto-graded answers. Phase 1 is complete; its answer ledger and verified
+  metrics are reusable evidence, not active work.
+- **Dashboard Construction**: the current Phase 2 workstream: a Streamlit
+  dashboard that answers one precise, important UC admissions question.
+- **Gemini API track**: a separate opportunity to build a focused AI-powered
+  app. It is optional to the dashboard and must not become a required network or
+  API-key dependency.
+
 ## Analytical question status
 
 The organizer's event question is still pending. The accepted planning

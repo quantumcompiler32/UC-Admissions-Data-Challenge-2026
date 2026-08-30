@@ -7,19 +7,22 @@ Admissions Data Challenge.
 
 1. Read [AGENTS.md](AGENTS.md), [docs/TEAM.md](docs/TEAM.md), and
    [CONTEXT.md](CONTEXT.md).
-2. Read the challenge brief and the dashboard UI/UX research:
+2. Read [docs/EVENT-PLAN.md](docs/EVENT-PLAN.md), the challenge brief, and the
+   dashboard UI/UX research:
    [UC-Admissions-Data-Challenge.md](UC-Admissions-Data-Challenge.md) and
    [docs/research/ui-ux-dashboard-skills.md](docs/research/ui-ux-dashboard-skills.md).
 3. Read [Data/README.md](Data/README.md) before calculating or interpreting a
    metric.
 4. Add the three human teammates' names and GitHub handles to
    [docs/TEAM.md](docs/TEAM.md).
-5. Wait for the organizer's event question. Then run the `grill-with-docs`
+5. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
+   and verified metrics.
+6. Wait for the Phase 2 dashboard question. Then run the `grill-with-docs`
    workflow before committing to the final dashboard story.
 
 ## Current planning state
 
-The event question is not yet available. The current planning hypothesis is to
+The Phase 2 dashboard question is not yet available. The current planning hypothesis is to
 investigate persistent above- or below-baseline UC admission-rate differences by
 school site, campus, and year. It is a starting point, not the final question.
 

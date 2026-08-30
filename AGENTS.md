@@ -9,9 +9,13 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 4. `UC-Admissions-Data-Challenge.md` for the challenge brief and data
    limitations.
 5. `docs/research/ui-ux-dashboard-skills.md` for dashboard design guidance.
+6. `docs/EVENT-PLAN.md` for the three-track event plan and handoff sequence.
 
 ## Current product status
 
+- Phase 1, the UC Question Sprint, is complete. Do not plan or redo the sprint
+  as active work; preserve and reuse its answer ledger and verified metrics.
+- The team is preparing for Phase 2: the dashboard question is still pending.
 - The dashboard audience is competition judges and generalist data reviewers.
 - The organizer's event question is still pending. The accepted planning
   hypothesis is: which California public high-school sites show persistent
@@ -41,6 +45,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   `Universitywide` as the sum of campus rows.
 - Use the tracked `Data/` package as the shared data source. Do not depend on a
   personal Downloads path or silently substitute a different dataset.
+- Keep completed Phase 1 evidence, Phase 2 Dashboard Construction, and the
+  optional Gemini API track separate. The dashboard must remain useful without
+  a Gemini API key or live network access.
 - Keep claims descriptive. Do not imply that a residual, school attribute, or
   policy-era change causes an admission outcome.
 
