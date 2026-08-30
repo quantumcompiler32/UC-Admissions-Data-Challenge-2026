@@ -36,6 +36,14 @@ def format_rate(value):
     return "Unavailable" if value is None or pd.isna(value) else f"{value:.1%}"
 
 
+def percentage_table(frame: pd.DataFrame, columns) -> pd.DataFrame:
+    table = frame.copy()
+    for column in columns:
+        if column in table.columns:
+            table[column] = table[column] * 100
+    return table
+
+
 def change_sentence(finding: dict) -> str:
     decrease = finding["decrease_pp"]
     second = (
@@ -72,6 +80,7 @@ p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
 
 metrics = load_ethnicity_metrics()
 years = sorted(metrics["fall_term"].dropna().astype(int).unique())
+year_labels = [str(year) for year in years]
 campuses = ["Systemwide"] + sorted(c for c in metrics["campus"].unique() if c != "Systemwide")
 
 with st.sidebar:
@@ -81,7 +90,8 @@ with st.sidebar:
     if entrant_level == "freshman":
         st.caption("Freshmen are the primary dashboard population; transfer is a secondary comparison.")
     campus = st.selectbox("Campus scope", campuses, index=0)
-    selected_year = st.select_slider("Fall year", years, value=max(years))
+    selected_year_label = st.select_slider("Fall year", year_labels, value=str(max(years)))
+    selected_year = int(selected_year_label)
     selected_metric = st.selectbox("Metric", list(METRIC_LABELS), format_func=lambda value: METRIC_LABELS[value], index=1)
     default_groups = ["African American", "Asian", "Hispanic/Latino(a)", "White"]
     selected_groups = st.multiselect("Reported groups", GROUP_ORDER, default=default_groups)
@@ -122,8 +132,10 @@ with overview_tab:
     highlighted = sorted({value[f"{direction}_group"] for value in findings.values() for direction in ("increase", "decrease")})
     with st.expander("Headline denominator check", expanded=False):
         denominator_rows = filter_metrics(metrics, entrant_level="freshman", campus="Systemwide", years=[2017, 2025], ethnicities=highlighted)
+        denominator_table = denominator_rows[["fall_term", "ethnicity", "applicants", "admits", "enrollees"]].rename(columns={"fall_term":"Fall year","ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees"})
+        denominator_table["Fall year"] = denominator_table["Fall year"].astype(int).astype(str)
         st.dataframe(
-            denominator_rows[["fall_term", "ethnicity", "applicants", "admits", "enrollees"]].rename(columns={"fall_term":"Fall year","ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees"}),
+            denominator_table,
             hide_index=True,
             width="stretch",
         )
@@ -139,7 +151,9 @@ with overview_tab:
     year_rows = active[active["ethnicity"].isin(selected_groups)].set_index("ethnicity").reindex(selected_groups).dropna(subset=[selected_metric])
     st.bar_chart(year_rows[[selected_metric]].rename(columns={selected_metric: METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
     display = active[active["ethnicity"].isin(selected_groups)][["ethnicity", "applicants", "admits", "enrollees", "application_share", "admission_rate", "yield_rate"]].sort_values(selected_metric, ascending=False)
-    st.dataframe(display.rename(columns={"ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees","application_share":"Application share","admission_rate":"Admission rate","yield_rate":"Enrollment yield"}), hide_index=True, width="stretch", column_config={"Application share":st.column_config.NumberColumn(format="%.1f%%"),"Admission rate":st.column_config.NumberColumn(format="%.1f%%"),"Enrollment yield":st.column_config.NumberColumn(format="%.1f%%")})
+    display_table = display.rename(columns={"ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees","application_share":"Application share","admission_rate":"Admission rate","yield_rate":"Enrollment yield"})
+    display_table = percentage_table(display_table, ["Application share", "Admission rate", "Enrollment yield"])
+    st.dataframe(display_table, hide_index=True, width="stretch", column_config={"Application share":st.column_config.NumberColumn(format="%.1f%%"),"Admission rate":st.column_config.NumberColumn(format="%.1f%%"),"Enrollment yield":st.column_config.NumberColumn(format="%.1f%%")})
 
 with trends_tab:
     st.subheader(f"{METRIC_LABELS[selected_metric]} over time")
@@ -147,7 +161,10 @@ with trends_tab:
     trend_rows = filter_metrics(metrics, entrant_level=entrant_level, campus=campus, ethnicities=selected_groups)
     trend = trend_rows.pivot(index="fall_term", columns="ethnicity", values=selected_metric)
     st.line_chart(trend, height=470)
-    st.dataframe(trend.reset_index().rename(columns={"fall_term":"Fall year"}), hide_index=True, width="stretch", column_config={group:st.column_config.NumberColumn(format="%.1f%%") for group in selected_groups})
+    trend_table = trend.reset_index().rename(columns={"fall_term":"Fall year"})
+    trend_table["Fall year"] = trend_table["Fall year"].astype(int).astype(str)
+    trend_table = percentage_table(trend_table, selected_groups)
+    st.dataframe(trend_table, hide_index=True, width="stretch", column_config={group:st.column_config.NumberColumn(format="%.1f%%") for group in selected_groups})
 
 with campus_tab:
     st.subheader(f"How campuses differed in {selected_year}")
@@ -155,9 +172,13 @@ with campus_tab:
     campus_rows = filter_metrics(metrics, entrant_level=entrant_level, years=[selected_year], ethnicities=[campus_group])
     campus_rows = campus_rows[campus_rows["campus"] != "Systemwide"].sort_values(selected_metric, ascending=False)
     st.bar_chart(campus_rows.set_index("campus")[[selected_metric]].rename(columns={selected_metric:METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
-    st.caption("Campus rows count applications to each campus. They are not additive student totals, and Systemwide is not an average campus.")
-    st.markdown("#### All reported groups by campus")
+    if selected_metric == "application_share":
+        st.caption("Campus application shares sum to 100% only when all reported groups are selected. Campus rows are not additive student totals, and Systemwide is not an average campus.")
+    else:
+        st.caption("Admission rates and enrollment yields are calculated separately for each group, so they do not sum to 100%. Campus rows are not additive student totals, and Systemwide is not an average campus.")
+    st.markdown("#### Selected reported groups by campus")
     matrix = campus_matrix(metrics, entrant_level=entrant_level, year=selected_year, metric=selected_metric, ethnicities=selected_groups)
+    matrix = percentage_table(matrix, matrix.columns)
     st.dataframe(matrix, width="stretch", column_config={column:st.column_config.NumberColumn(format="%.1f%%") for column in matrix.columns})
 
 with gpa_tab:

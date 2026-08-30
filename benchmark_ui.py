@@ -33,7 +33,7 @@ def _reset_benchmark() -> None:
 
 def _year_range(years, key: str):
     minimum, maximum = int(min(years)), int(max(years))
-    return st.slider("Fall year range", minimum, maximum, (minimum, maximum), key=key)
+    return st.slider("Fall year range", minimum, maximum, (minimum, maximum), format="%d", key=key)
 
 
 def _format_count(value):
@@ -89,6 +89,8 @@ def render_benchmark_result(result: Dict) -> None:
                 "admission_rate": "Admission rate",
             }
         )
+        table["Fall year"] = table["Fall year"].astype(int).astype(str)
+        table["Admission rate"] = table["Admission rate"] * 100
         st.dataframe(
             table,
             hide_index=True,
