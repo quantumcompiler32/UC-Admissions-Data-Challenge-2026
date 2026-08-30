@@ -16,6 +16,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 - Phase 1, the UC Question Sprint, is complete. Do not plan or redo the sprint
   as active work; preserve and reuse its answer ledger and verified metrics.
 - The team is preparing for Phase 2: the dashboard question is still pending.
+- Ownership is documented in `docs/TEAM.md`: the Dashboard owner leads UX and
+  Streamlit, Ranveer leads technical/data work, and Rathin handles bounded
+  reproducibility and presentation support.
 - The dashboard audience is competition judges and generalist data reviewers.
 - The organizer's event question is still pending. The accepted planning
   hypothesis is: which California public high-school sites show persistent

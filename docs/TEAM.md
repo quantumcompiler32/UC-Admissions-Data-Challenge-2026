@@ -7,6 +7,7 @@
 - Shared work surface: this repository and its GitHub Issues
 - Repository account: `quantumcompiler32`
 - Human team size: three people
+- GitHub collaborator invitations: sent; acceptance is pending
 
 The repository account is not assumed to identify a specific human. Personal
 names and GitHub handles are intentionally left unassigned until the team
@@ -14,15 +15,16 @@ provides them.
 
 ## People and role ownership
 
-The team has three human members. Names and GitHub handles have not been
-provided yet, so the roster uses role slots rather than invented identities.
-Agents may assist any owner but must not silently claim ownership.
+The team has three human members. GitHub handles are still pending collaborator
+acceptance, so agents should use the names below for routing and verify handles
+from GitHub before assigning a pull request. Agents may assist any owner but
+must not silently claim ownership.
 
 | Team slot | Combined role | Person | Agent handoff expectation |
 | --- | --- | --- | --- |
-| Person 1 | Data + Phase 1 evidence lead: schema, joins, redaction, denominators, sprint answer ledger, and interpretation | TBD | Audit and reuse Phase 1 metrics; record field definitions, coverage checks, reproducible calculations, and claim boundaries. |
-| Person 2 | Dashboard + UX lead: information architecture, interaction, accessibility, and visual design | TBD | Read `CONTEXT.md` and the UI/UX research before changing the visual system. |
-| Person 3 | Gemini API + presentation lead: focused AI-app experiment, README, sources, limitations, launch instructions, and final pitch | TBD | Keep the Gemini experiment isolated and preserve evidence for every presented number and limitation. |
+| Person 1 | Technical + data lead: schema, joins, redaction, denominators, Phase 1 evidence, calculations, and technical infrastructure | Ranveer | Audit and reuse Phase 1 metrics; own reproducible calculations, data QA, and technical risk. |
+| Person 2 | Dashboard + UX lead: information architecture, interaction, accessibility, visual design, and final dashboard question | Moksh | Read `CONTEXT.md` and the UI/UX research before changing the visual system; own the Streamlit presentation path. |
+| Person 3 | Reproducibility + presentation support: README, sources, limitations, QA checklists, packaging, and bounded documentation tasks | Rathin | Keep evidence organized, complete clearly scoped tasks, and escalate analytical or technical decisions to the relevant owner. |
 
 ### How to update the roster
 
@@ -84,12 +86,13 @@ primary claim.
 
 ## Recommended start sequence
 
-1. Add the three teammates' names and GitHub handles to this file.
+1. Confirm the collaborator invitations and add verified GitHub handles to this
+   file.
 2. Confirm every teammate can clone, create a branch, and open/push a test
    change.
-3. At Phase 2 start, split into the Dashboard and optional Gemini API lanes;
-   have Person 1 audit the completed Phase 1 evidence and share definitions and
-   findings through the repo.
+3. At Phase 2 start, the Dashboard owner leads the Streamlit path, Ranveer
+   audits the completed Phase 1 evidence and technical foundations, and Rathin
+   handles bounded reproducibility and presentation support.
 4. When the organizer's dashboard question arrives, run `grill-with-docs` and
    update `CONTEXT.md`/ADRs with the question-specific decisions.
 5. Convert the confirmed dashboard design into a small spec and GitHub Issues

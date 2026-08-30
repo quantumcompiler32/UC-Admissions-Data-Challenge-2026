@@ -13,8 +13,9 @@ Admissions Data Challenge.
    [docs/research/ui-ux-dashboard-skills.md](docs/research/ui-ux-dashboard-skills.md).
 3. Read [Data/README.md](Data/README.md) before calculating or interpreting a
    metric.
-4. Add the three human teammates' names and GitHub handles to
-   [docs/TEAM.md](docs/TEAM.md).
+4. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
+   invitations are pending acceptance, and verified GitHub handles should be
+   added there afterward.
 5. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
    and verified metrics.
 6. Wait for the Phase 2 dashboard question. Then run the `grill-with-docs`
