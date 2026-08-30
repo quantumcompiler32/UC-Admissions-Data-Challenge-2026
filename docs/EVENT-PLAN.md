@@ -99,6 +99,12 @@ reliable dashboard, and well-understood presentation. The answer should be
 computed and checked in a notebook or equivalent reproducible analysis before
 the dashboard becomes the presentation surface.
 
+The primary visual is a zero-centered diverging horizontal ranking. Selecting a
+school-campus combination opens rate, count, year, consistency, and coverage
+evidence. Low-volume or incomplete groups receive an explicit limited-evidence
+label; the dashboard does not imply inferential confidence without validated
+statistical methods.
+
 ## Gemini API protocol
 
 Use Gemini as a meaningful companion feature, not a generic chatbot. The first

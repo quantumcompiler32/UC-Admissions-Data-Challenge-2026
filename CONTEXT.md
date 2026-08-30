@@ -93,6 +93,14 @@ consistent residual across at least three observed years.
 - Profile input: a structured form plus optional pasted resume text; the user
   confirms before transmission, contact details are removed, and the data is
   not stored.
+- Primary chart: a zero-centered diverging horizontal ranking with positive and
+  negative gaps separated clearly and school, campus, residual, applicants,
+  and years visible.
+- Detail evidence: selecting a school-campus combination reveals actual rate,
+  expected rate, residual, applicants, admits, years observed, direction
+  consistency, and a year-by-year trend.
+- Evidence strength: applicant count, years observed, and coverage remain
+  visible; limited evidence is labeled rather than hidden or overstated.
 - Profile data: optional, temporary, and transmitted to Gemini only after the
   user explicitly confirms. Contact details and unnecessary personal data are
   excluded, and the profile is not stored in the repository.
