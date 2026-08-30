@@ -12,6 +12,8 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 6. `docs/EVENT-PLAN.md` for the three-track event plan and handoff sequence.
 7. `docs/SUBMISSION-MATRIX.md` for the evidence required to submit to all
    three challenge categories.
+8. `docs/REFERENCE-DECK.md` for source facts transcribed from the organizer's
+   slide deck and the decisions they informed.
 
 ## Current product status
 
@@ -21,6 +23,10 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 - The submission target is all three challenge categories; each requires a
   distinct evidence path even if the dashboard and Gemini feature share one
   Streamlit application.
+- The organizer deck says the Question Sprint and Dashboard are each 50% of
+  the score. The dashboard question must specify a time window, population,
+  and metric; the answer should be worked out reproducibly before building
+  `app.py`, and the app should be deployed early.
 - Ownership is documented in `docs/TEAM.md`: the Dashboard owner leads UX and
   Streamlit, Ranveer leads technical/data work, and Rathin handles bounded
   reproducibility and presentation support.

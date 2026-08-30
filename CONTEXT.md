@@ -17,6 +17,20 @@ the denominator, comparison baseline, coverage, and limitations visible.
   AI-powered capability. It may share the Streamlit app, but must not become a
   required network or API-key dependency for the dashboard.
 
+## Organizer deck constraints
+
+The organizer slide deck states that the Question Sprint and Dashboard each
+represent 50% of the score. For the dashboard, the question must specify a time
+window, population of interest, and metric; the answer should be worked out in
+Google Colab with Python/Pandas before the Streamlit `app.py` is built; the app
+should be deployed early; and the team submits a GitHub repository link with a
+methodology README and presents the dashboard. The visible rubric covers the
+question, finding, rigor, dashboard accuracy/reliability, and presentation.
+
+The deck does not specify the final Phase 2 question or detailed Gemini award
+criteria. See `docs/REFERENCE-DECK.md` for the source-fact and decision
+boundary.
+
 ## Analytical question status
 
 The organizer's event question is still pending. The accepted planning

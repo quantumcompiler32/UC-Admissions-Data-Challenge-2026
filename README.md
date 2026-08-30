@@ -13,14 +13,16 @@ Submission target: all three challenge categories shown in the event form.
    dashboard UI/UX research:
    [UC-Admissions-Data-Challenge.md](UC-Admissions-Data-Challenge.md) and
    [docs/research/ui-ux-dashboard-skills.md](docs/research/ui-ux-dashboard-skills.md).
-3. Read [Data/README.md](Data/README.md) before calculating or interpreting a
+3. Read [docs/REFERENCE-DECK.md](docs/REFERENCE-DECK.md) for the organizer
+   slide-deck constraints.
+4. Read [Data/README.md](Data/README.md) before calculating or interpreting a
    metric.
-4. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
+5. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
    invitations are pending acceptance, and verified GitHub handles should be
    added there afterward.
-5. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
+6. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
    and verified metrics.
-6. Wait for the Phase 2 dashboard question. Then run the `grill-with-docs`
+7. Wait for the Phase 2 dashboard question. Then run the `grill-with-docs`
    workflow before committing to the final dashboard story.
 
 ## Current planning state
@@ -42,6 +44,12 @@ The intended Gemini feature is a source-grounded “Explain this view” compani
 deterministic Python computes the numbers, and Gemini explains a selected
 aggregate snapshot. The dashboard must still run without `GEMINI_API_KEY` or
 network access.
+
+The organizer deck's visible dashboard rubric is: question (time window,
+population, metric), concise and justifiable finding, nuanced and mature rigor,
+accurate and reliable dashboard, and well-understood presentation. See
+[docs/REFERENCE-DECK.md](docs/REFERENCE-DECK.md) for the full source/decision
+boundary.
 
 See [docs/SUBMISSION-MATRIX.md](docs/SUBMISSION-MATRIX.md) for the evidence
 required for each submission category.

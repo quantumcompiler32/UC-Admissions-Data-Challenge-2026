@@ -1,7 +1,8 @@
 # Event Plan
 
-This plan incorporates the user-provided event card screenshot. It describes
-three challenge tracks and records that Phase 1 is complete:
+This plan incorporates the user-provided event card screenshot and the
+organizer-provided slide deck. It describes three challenge tracks and records
+that Phase 1 is complete:
 
 1. **Best Use of the Google Gemini API**: an intended focused AI-powered
    capability, isolated from dashboard correctness.
@@ -10,9 +11,11 @@ three challenge tracks and records that Phase 1 is complete:
 3. **UC Dashboard Construction — current Phase 2 focus**: build a Streamlit
    dashboard that answers one precise, important question about UC admissions.
 
-The screenshot does not provide the judging rubric, question-sprint format,
-numeric tolerance, submission mechanics, presentation length, or Gemini API-key
-provisioning. Treat those as organizer questions, not assumptions.
+The slide deck adds a visible dashboard rubric and workflow constraints. It does
+not provide numeric tolerance, presentation length, Gemini judging details,
+API-key provisioning, or a final Phase 2 question. Treat those as organizer
+questions, not assumptions. The extracted deck facts and decision boundary are
+in `docs/REFERENCE-DECK.md`.
 
 ## Operating principle
 
@@ -44,6 +47,8 @@ responsible for the decision and handoff, not the only person allowed to edit.
   `Universitywide`, school-site identity, and coverage.
 - Prepare a minimal Streamlit shell that can be redirected after the grill; do
   not spend time polishing speculative charts.
+- Deploy the minimal shell early enough to catch Streamlit deployment issues;
+  the organizer deck explicitly warns not to wait until the last minute.
 - Prepare a Gemini proof-of-concept boundary, but do not couple it to dashboard
   startup or core calculations. The intended capability is “Explain this view”:
   Gemini summarizes a small, already-computed selection snapshot and its
@@ -87,6 +92,12 @@ post-question grill confirms it. The final path is:
 
 `question → data contract → primary visual → supporting evidence → limitation →
 presentation check`
+
+The deck's five visible rubric checks are: question (time window, population,
+metric), concise and justifiable finding, nuanced and mature rigor, accurate and
+reliable dashboard, and well-understood presentation. The answer should be
+computed and checked in a notebook or equivalent reproducible analysis before
+the dashboard becomes the presentation surface.
 
 ## Gemini API protocol
 
