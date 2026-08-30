@@ -102,7 +102,8 @@ the dashboard becomes the presentation surface.
 ## Gemini API protocol
 
 Use Gemini as a meaningful companion feature, not a generic chatbot. The first
-candidate is “Explain this view”:
+candidate is “Explain this view.” If time permits, an optional Profile Context
+Explorer can add a user-provided profile or resume path:
 
 1. Deterministic Python code computes the selected view's rates, counts,
    residuals, coverage, and limitations.
@@ -112,6 +113,13 @@ candidate is “Explain this view”:
    and source fields visible beside it.
 4. The app validates the response shape, labels it as generated, and offers a
    deterministic fallback when `GEMINI_API_KEY` is absent or the request fails.
+
+The Profile Context Explorer may summarize declared profile information and
+relate it to school-level evidence. It must not calculate or imply individual
+admission odds: the supplied data is aggregated, not applicant-level. It must
+be opt-in, require explicit confirmation before sending text to Gemini, avoid
+contact details and unnecessary personal information, and avoid persistent
+storage of the profile.
 
 Do not use Gemini to calculate authoritative metrics, infer missing values, or
 make the dashboard unusable when the API is unavailable. Keep the API key in an

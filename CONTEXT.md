@@ -17,6 +17,12 @@ the denominator, comparison baseline, coverage, and limitations visible.
   AI-powered capability. It may share the Streamlit app, but must not become a
   required network or API-key dependency for the dashboard.
 
+The planned Gemini capabilities are a source-grounded “Explain this view”
+companion and, if time permits, an optional Profile Context Explorer. The
+Profile Context Explorer may summarize user-provided profile or resume text and
+relate declared interests to school-level dashboard evidence, but it does not
+estimate individual admission odds or probabilities.
+
 ## Organizer deck constraints
 
 The organizer slide deck states that the Question Sprint and Dashboard each
@@ -79,6 +85,9 @@ consistent residual across at least three observed years.
   immediately, with the time window, population, and metric visible.
 - Supporting flow: campus/year context followed by clickable school-campus
   detail; Policy Timeline remains context rather than the primary story.
+- Profile data: optional, temporary, and transmitted to Gemini only after the
+  user explicitly confirms. Contact details and unnecessary personal data are
+  excluded, and the profile is not stored in the repository.
 
 ## Population and grain
 
@@ -144,4 +153,6 @@ consistent residual across at least three observed years.
 The dashboard presents descriptive patterns and associations. It does not claim
 that school characteristics, policy changes, or residuals cause admission
 outcomes. Fall 2020 is affected by COVID, and fall 2021 onward reflects the
-post-SAT/ACT admissions-policy context.
+post-SAT/ACT admissions-policy context. It also does not produce individual
+admission odds from a profile or resume; the supplied data is aggregated rather
+than applicant-level.

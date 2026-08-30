@@ -42,8 +42,11 @@ The planning defaults are:
 
 The intended Gemini feature is a source-grounded “Explain this view” companion:
 deterministic Python computes the numbers, and Gemini explains a selected
-aggregate snapshot. The dashboard must still run without `GEMINI_API_KEY` or
-network access.
+aggregate snapshot. An optional Profile Context Explorer may summarize a
+user-provided profile or resume and relate declared interests to school-level
+evidence, but it must not estimate individual admission odds. Profile data is
+temporary and requires explicit confirmation before transmission. The
+dashboard must still run without `GEMINI_API_KEY` or network access.
 
 The organizer deck's visible dashboard rubric is: question (time window,
 population, metric), concise and justifiable finding, nuanced and mature rigor,
