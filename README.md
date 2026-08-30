@@ -1,7 +1,19 @@
 # UC Admissions Data Challenge 2026
 
+[![Tests](https://github.com/quantumcompiler32/UC-Admissions-Data-Challenge-2026/actions/workflows/tests.yml/badge.svg)](https://github.com/quantumcompiler32/UC-Admissions-Data-Challenge-2026/actions/workflows/tests.yml)
+
 Judge-facing Streamlit analysis for the UC Admissions Data Challenge, with the
 completed Question Sprint evidence preserved separately.
+
+## Judge quick links
+
+- [Two-minute presentation speech](docs/PRESENTATION-SPEECH.md)
+- [Click-by-click demo path](docs/DEMO.md)
+- [Methodology and product contract](CONTEXT.md)
+- [Reproducible analysis notebook](notebooks/uc_ethnicity_outcomes_colab.ipynb)
+- [Verification checklist](docs/QA-CHECKLIST.md)
+- [Data provenance and field definitions](Data/README.md)
+- [Archived and inactive work map](docs/ARCHIVE.md)
 
 ## Dashboard question
 
@@ -95,6 +107,7 @@ should be interpreted with their counts visible.
 - `CONTEXT.md` and `docs/GRILL-SUMMARY.md`: accepted product contract
 - `docs/PRESENTATION-SPEECH.md`: judge-facing presentation script
 - `docs/QUESTION-SPRINT-LEDGER.md`: preserved Phase 1 evidence
+- `docs/ARCHIVE.md`: map of superseded residual and inactive Gemini artifacts
 
 The former persistent residual analysis remains archived in `analysis.py`, its
 tests, notebook, research note, and superseded ADR. It is not the current
