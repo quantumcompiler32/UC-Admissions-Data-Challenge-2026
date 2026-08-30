@@ -62,7 +62,7 @@ if ranking.empty:
     st.warning("No persistent combinations match these controls.")
 else:
     st.bar_chart(ranking.set_index("school")["residual_pp"], horizontal=True)
-    st.dataframe(ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(columns={"direction_label": "Direction", "residual_pp": "Residual (percentage points)", "pooled_applicants": "Pooled applicants", "years_observed": "Years observed", "limited_evidence": "Limited evidence"}), hide_index=True, use_container_width=True)
+    st.dataframe(ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(columns={"direction_label": "Direction", "residual_pp": "Residual (percentage points)", "pooled_applicants": "Pooled applicants", "years_observed": "Years observed", "limited_evidence": "Limited evidence"}), hide_index=True, width="stretch")
 
 st.subheader("School-campus detail")
 if not filtered.empty:
@@ -82,7 +82,7 @@ if not filtered.empty:
     st.caption(f"{selected_row['years_observed']} residual years observed. Stable identity: ATP code {selected_row['atp_code']}. 2022 is shown below as baseline unavailable.")
     chart_data = detail.set_index("fall_term")[["actual_rate", "expected_rate"]].rename(columns={"actual_rate": "Actual admission rate", "expected_rate": "Provided expected rate"})
     st.line_chart(chart_data)
-    st.dataframe(detail.rename(columns={"fall_term": "Fall year", "actual_rate": "Actual rate", "expected_rate": "Provided expected rate", "residual": "Residual", "baseline_available": "Baseline available", "coverage_status": "Coverage"}), hide_index=True, use_container_width=True)
+    st.dataframe(detail.rename(columns={"fall_term": "Fall year", "actual_rate": "Actual rate", "expected_rate": "Provided expected rate", "residual": "Residual", "baseline_available": "Baseline available", "coverage_status": "Coverage"}), hide_index=True, width="stretch")
     with st.expander("Structured source snapshot for this view"):
         st.caption("This is the only evidence payload intended for the optional explanation feature; the full CSV is never sent.")
         st.json(snapshot)
@@ -99,7 +99,7 @@ else:
 st.subheader("Separate Universitywide context")
 st.caption("Universitywide counts students admitted to at least one UC; it is not the sum of campus rows and is never included in the campus ranking.")
 uw = universitywide_context(data)
-st.dataframe(uw.rename(columns={"fall_term": "Fall year", "applicants": "Applicants", "admits": "Admits", "actual_rate": "Actual admission rate"}), hide_index=True, use_container_width=True)
+st.dataframe(uw.rename(columns={"fall_term": "Fall year", "applicants": "Applicants", "admits": "Admits", "actual_rate": "Actual admission rate"}), hide_index=True, width="stretch")
 
 with st.expander("Methods, definitions, coverage, and limitations", expanded=True):
     st.markdown("""
