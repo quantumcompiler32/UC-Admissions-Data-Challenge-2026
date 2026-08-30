@@ -1,18 +1,24 @@
 """Judge-facing Streamlit app for the UC Persistent Gap Observatory."""
 
-import json
+import hashlib
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
 from analysis import (
-    RESIDUAL_YEARS, calculate_persistent_gaps, filter_gaps, gap_detail,
-    campus_year_context, load_dashboard_data, snapshot_for_gap,
+    RESIDUAL_YEARS,
+    calculate_persistent_gaps,
+    campus_year_context,
+    filter_gaps,
+    gap_detail,
+    load_dashboard_data,
+    snapshot_for_gap,
     universitywide_context,
 )
 from gemini import client_from_environment, explain_view
 from profile import build_redacted_payload, clear_profile_payload, explain_profile
+
 
 DATA_PATH = Path(__file__).parent / "Data" / "dashboard_data.csv"
 
@@ -27,67 +33,167 @@ def _school_label(row):
     return f"{row['high_school'] or 'Unknown school'} · {row['city'] or 'Unknown city'} — {row['campus']} [{row['atp_code']}]"
 
 
-st.set_page_config(page_title="UC Persistent Gap Observatory", page_icon="📊", layout="wide")
+def _reset_filters():
+    st.session_state.update({
+        "gap_campus": "All campuses",
+        "gap_year": "All residual years",
+        "gap_direction": "Both",
+        "global_school_query": "",
+    })
+
+
+def _rank_label(row):
+    return f"{row['high_school'] or 'Unknown school'} · {row['city'] or 'Unknown city'} — {row['campus']}"
+
+
+st.set_page_config(
+    page_title="UC Persistent Gap Observatory",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+st.markdown(
+    """
+    <style>
+        .block-container { max-width: 1280px; padding-top: 2.4rem; padding-bottom: 3rem; }
+        h1 { letter-spacing: -0.035em; }
+        [data-testid="stMetricValue"] { font-variant-numeric: tabular-nums; }
+        [data-testid="stMetricLabel"] { font-size: 0.84rem; }
+        [data-testid="stDataFrame"] { border: 1px solid rgba(49, 51, 63, 0.18); border-radius: 0.35rem; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 data, gaps = load_results()
-st.title("UC Persistent Gap Observatory")
-st.caption("Descriptive evidence from represented California public-high-school applicants · zero-centered actual-versus-provided-baseline view")
-st.markdown("**Question:** Among California public-high-school applicants represented in the data, which high-school-site and UC-campus combinations showed persistent, applicant-weighted actual-minus-provided-expected admission-rate gaps during 2017–2025, excluding 2022 when the baseline is unavailable?")
-st.info("**Metric and scope.** Residual = pooled actual admission rate − applicant-weighted provided expected admission rate, shown in percentage points. The tracked data represents aggregated school-level records, not individual students. Fall 2022 is an explicit **baseline unavailable** break; it is not interpolated.")
+st.title("Where do admission rates persistently differ from the provided baseline?")
+st.caption("California public high-school site × UC campus pairs · 2017–2025 · Fall 2022 baseline unavailable")
+st.markdown(
+    "**Question.** Which represented California public-high-school and UC-campus pairs "
+    "consistently had actual admission rates above or below the provided expected rate?"
+)
+st.caption(
+    "Rates are pooled from admits and applicants. This is descriptive, school-level evidence—not an "
+    "individual admission prediction or a causal claim."
+)
 
 with st.sidebar:
-    st.header("Explore the evidence")
-    st.caption("The persistence rule stays fixed while these controls change the visible scope.")
-    campus = st.selectbox("UC campus", ["All campuses"] + sorted(gaps["campus"].unique().tolist()))
+    st.header("Filter the evidence")
+    st.caption("These controls narrow the visible persistent pairs; the qualification rule stays fixed.")
+    campus = st.selectbox(
+        "UC campus",
+        ["All campuses"] + sorted(gaps["campus"].unique().tolist()),
+        key="gap_campus",
+    )
     year_options = ["All residual years"] + list(RESIDUAL_YEARS)
-    selected_year = st.selectbox("Residual year present", year_options)
+    selected_year = st.selectbox("Residual year present", year_options, key="gap_year")
     year = None if selected_year == "All residual years" else int(selected_year)
-    direction = st.radio("Gap direction", ["Both", "Positive", "Negative"], format_func=lambda value: {"Both": "Both directions", "Positive": "Above provided baseline (+)", "Negative": "Below provided baseline (−)"}[value])
-    school_query = st.text_input("School or city", placeholder="Optional search")
+    direction = st.radio(
+        "Gap direction",
+        ["Both", "Positive", "Negative"],
+        format_func=lambda value: {
+            "Both": "Both directions",
+            "Positive": "Above provided baseline (+)",
+            "Negative": "Below provided baseline (−)",
+        }[value],
+        key="gap_direction",
+    )
+    school_query = st.text_input(
+        "School or city (filters all sections)",
+        placeholder="Optional search",
+        key="global_school_query",
+    )
+    st.button("Reset filters", on_click=_reset_filters, use_container_width=True)
 
 filtered = filter_gaps(gaps, data, campus=campus, year=year, direction=direction, school_query=school_query)
-positive = filtered[filtered["direction"] == "positive"].nlargest(10, "pooled_residual")
-negative = filtered[filtered["direction"] == "negative"].nsmallest(10, "pooled_residual")
+positive = filtered[filtered["direction"] == "positive"].nlargest(10, "pooled_residual").copy()
+negative = filtered[filtered["direction"] == "negative"].nsmallest(10, "pooled_residual").copy()
 ranking = pd.concat([positive, negative], ignore_index=True)
-ranking["school"] = ranking["high_school"].fillna("Unknown school") + " · " + ranking["city"].fillna("Unknown city")
-ranking["direction_label"] = ranking["direction"].map({"positive": "Positive (+)", "negative": "Negative (−)"})
+ranking["school"] = ranking.apply(_rank_label, axis=1)
+ranking["direction_label"] = ranking["direction"].map({"positive": "Above (+)", "negative": "Below (−)"})
 ranking["residual_pp"] = ranking["pooled_residual"] * 100
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Persistent in scope", len(filtered))
-col2.metric("Above baseline (+)", int((filtered["direction"] == "positive").sum()))
-col3.metric("Below baseline (−)", int((filtered["direction"] == "negative").sum()))
-st.caption("Default full-scope finding: 306 persistent combinations — 204 positive and 102 negative. A sign label accompanies every result; color is not the only cue.")
+col1.metric("Persistent pairs in view", len(filtered))
+col2.metric("Above provided baseline", int((filtered["direction"] == "positive").sum()))
+col3.metric("Below provided baseline", int((filtered["direction"] == "negative").sum()))
+st.caption(
+    "Full-scope finding: 306 persistent pairs—204 above and 102 below the provided baseline. "
+    "A persistent pair has at least three residual years and the same direction in at least 80% of them."
+)
 
-st.subheader("Top persistent school-campus gaps")
+st.subheader("Persistent gaps, ranked around zero")
+st.caption(
+    "Each bar is the pooled actual admission rate minus the applicant-weighted provided expected rate, "
+    "in percentage points."
+)
 if ranking.empty:
     st.warning("No persistent combinations match these controls.")
 else:
-    st.bar_chart(ranking.set_index("school")["residual_pp"], horizontal=True)
-    st.dataframe(ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(columns={"direction_label": "Direction", "residual_pp": "Residual (percentage points)", "pooled_applicants": "Pooled applicants", "years_observed": "Years observed", "limited_evidence": "Limited evidence"}), hide_index=True, width="stretch")
+    positive_col, negative_col = st.columns(2)
+    with positive_col:
+        st.markdown("**Above provided baseline (+)**")
+        if positive.empty:
+            st.caption("No matching positive gaps.")
+        else:
+            st.bar_chart(positive.set_index(positive.apply(_rank_label, axis=1))["pooled_residual"] * 100, horizontal=True, color="#176B5A")
+    with negative_col:
+        st.markdown("**Below provided baseline (−)**")
+        if negative.empty:
+            st.caption("No matching negative gaps.")
+        else:
+            st.bar_chart(negative.set_index(negative.apply(_rank_label, axis=1))["pooled_residual"] * 100, horizontal=True, color="#B23A48")
+    st.dataframe(
+        ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(
+            columns={
+                "school": "High-school site · city · campus",
+                "direction_label": "Direction",
+                "residual_pp": "Residual (percentage points)",
+                "pooled_applicants": "Pooled applicants",
+                "years_observed": "Years observed",
+                "limited_evidence": "Limited evidence",
+            }
+        ),
+        hide_index=True,
+        width="stretch",
+    )
 
-st.subheader("Campus and year context")
-st.caption("Applicant-weighted rollups show how residuals vary by campus and year; they do not redefine the fixed persistence rule.")
-context = campus_year_context(data).copy()
+st.subheader("How the visible pairs vary by campus and year")
+st.caption("Applicant-weighted context for the persistent pairs shown above. It explains the ranking; it does not redefine persistence.")
+context = campus_year_context(
+    data,
+    school_query=school_query,
+    persistent_keys=filtered[["atp_code", "campus"]],
+).copy()
 context["residual_pp"] = context["residual"] * 100
 context["campus_year"] = context["campus"] + " · " + context["fall_term"].astype(int).astype(str)
-st.bar_chart(context.set_index("campus_year")["residual_pp"], horizontal=True)
-st.dataframe(
-    context[["fall_term", "campus", "applicants", "admits", "actual_rate", "expected_rate", "residual_pp"]].rename(
-        columns={
-            "fall_term": "Fall year", "campus": "Campus", "applicants": "Applicants",
-            "admits": "Admits", "actual_rate": "Actual rate",
-            "expected_rate": "Provided expected rate",
-            "residual_pp": "Residual (percentage points)",
-        }
-    ),
-    hide_index=True,
-    width="stretch",
-)
+if context.empty:
+    st.info("No residual-ready records match the visible persistent-pair scope.")
+else:
+    st.bar_chart(context.set_index("campus_year")["residual_pp"], horizontal=True, height=420)
+    st.dataframe(
+        context[["fall_term", "campus", "applicants", "admits", "actual_rate", "expected_rate", "residual_pp"]].rename(
+            columns={
+                "fall_term": "Fall year",
+                "campus": "Campus",
+                "applicants": "Applicants",
+                "admits": "Admits",
+                "actual_rate": "Actual rate",
+                "expected_rate": "Provided expected rate",
+                "residual_pp": "Residual (percentage points)",
+            }
+        ),
+        hide_index=True,
+        width="stretch",
+    )
 
-st.subheader("School-campus detail")
+st.subheader("Inspect one school-campus pair")
+snapshot = None
 if not filtered.empty:
-    selected_label = st.selectbox("Select evidence (ATP code disambiguates duplicate school names)", filtered.apply(_school_label, axis=1).tolist())
-    selected_row = filtered.iloc[filtered.apply(_school_label, axis=1).tolist().index(selected_label)]
+    selection_options = filtered.apply(_school_label, axis=1).tolist()
+    selection_key = "detail_selection_" + hashlib.sha1(school_query.encode("utf-8")).hexdigest()
+    selected_label = st.selectbox("Select evidence (ATP code disambiguates duplicate school names)", selection_options, key=selection_key)
+    selected_row = filtered.iloc[selection_options.index(selected_label)]
     detail = gap_detail(data, selected_row["atp_code"], selected_row["campus"])
     snapshot = snapshot_for_gap(data, gaps, selected_row["atp_code"], selected_row["campus"])
     evidence_label = "Limited evidence" if selected_row["limited_evidence"] else "Evidence threshold met"
@@ -99,10 +205,25 @@ if not filtered.empty:
     metrics[3].metric("Provided baseline", f"{selected_row['expected_rate']:.1%}")
     metrics[4].metric("Residual", f"{selected_row['pooled_residual'] * 100:+.2f} pp")
     metrics[5].metric("Direction consistency", f"{selected_row['direction_consistency']:.0%}")
-    st.caption(f"{selected_row['years_observed']} residual years observed. Stable identity: ATP code {selected_row['atp_code']}. 2022 is shown below as baseline unavailable.")
-    chart_data = detail.set_index("fall_term")[["actual_rate", "expected_rate"]].rename(columns={"actual_rate": "Actual admission rate", "expected_rate": "Provided expected rate"})
+    st.caption(f"{selected_row['years_observed']} residual years observed. ATP code {selected_row['atp_code']} is the stable site identity. 2022 is marked as baseline unavailable.")
+    chart_data = detail.set_index("fall_term")[["actual_rate", "expected_rate"]].rename(
+        columns={"actual_rate": "Actual admission rate", "expected_rate": "Provided expected rate"}
+    )
     st.line_chart(chart_data)
-    st.dataframe(detail.rename(columns={"fall_term": "Fall year", "actual_rate": "Actual rate", "expected_rate": "Provided expected rate", "residual": "Residual", "baseline_available": "Baseline available", "coverage_status": "Coverage"}), hide_index=True, width="stretch")
+    st.dataframe(
+        detail.rename(
+            columns={
+                "fall_term": "Fall year",
+                "actual_rate": "Actual rate",
+                "expected_rate": "Provided expected rate",
+                "residual": "Residual",
+                "baseline_available": "Baseline available",
+                "coverage_status": "Coverage",
+            }
+        ),
+        hide_index=True,
+        width="stretch",
+    )
     with st.expander("Structured source snapshot for this view"):
         st.caption("This is the only evidence payload intended for the optional explanation feature; the full CSV is never sent.")
         st.json(snapshot)
@@ -114,26 +235,32 @@ if not filtered.empty:
         st.write(result["text"])
         st.caption(f"Status: {result['reason']}. Source metrics remain above and are authoritative.")
 else:
-    snapshot = None
+    st.info("Adjust the filters to inspect a persistent school-campus pair.")
 
-st.subheader("Separate Universitywide context")
-st.caption("Universitywide counts students admitted to at least one UC; it is not the sum of campus rows and is never included in the campus ranking.")
-uw = universitywide_context(data)
-st.dataframe(uw.rename(columns={"fall_term": "Fall year", "applicants": "Applicants", "admits": "Admits", "actual_rate": "Actual admission rate"}), hide_index=True, width="stretch")
+with st.expander("Methods, coverage, and limitations", expanded=False):
+    st.markdown(
+        """
+        **Persistence.** A school-site/campus pair needs at least three residual years, at least 80% of yearly residuals on one side of zero, and agreement between that dominant direction and the pooled residual sign. Rates are calculated from pooled admits and applicants; percentages are never averaged.
 
-with st.expander("Methods, definitions, coverage, and limitations", expanded=True):
-    st.markdown("""
-    **Persistence.** A school-site/campus combination needs at least three residual years, at least 80% of yearly residuals on one side of zero, and agreement between that dominant direction and the pooled residual sign. Rates are calculated from pooled admits and applicants; percentages are never averaged.
+        **Evidence boundaries.** `expected_admit_rate` is a provided baseline whose construction is undocumented. It is not causal truth and the results are not a fairness verdict. Blank or redacted values stay unknown and are excluded when a required residual field is unavailable. `atp_code` is the stable school-site identity; displayed school and city names can repeat.
 
-    **Evidence boundaries.** `expected_admit_rate` is a provided baseline whose construction is undocumented. It is not causal truth and the results are not a fairness verdict. Blank or redacted values stay unknown and are excluded when a required residual field is unavailable. `atp_code` is the stable school-site identity; displayed school and city names can repeat.
+        **Coverage.** Residual-ready years are 2017–2021 and 2023–2025. Fall 2020 may reflect COVID disruption. Fall 2021 onward is a different test-policy era after UC stopped considering SAT/ACT scores. These are context caveats, not causal explanations. Limited evidence means fewer than five residual years or fewer than 100 pooled applicants; those results remain visible.
 
-    **Coverage.** Residual-ready years are 2017–2021 and 2023–2025. Fall 2020 may reflect COVID disruption. Fall 2021 onward is a different test-policy era after UC stopped considering SAT/ACT scores. These are context caveats, not causal explanations. Limited evidence means fewer than five residual years or fewer than 100 pooled applicants; those results remain visible.
+        **Boundary.** These aggregated records cannot determine an individual student's chance of admission. The dashboard does not calculate admission odds or causal explanations.
+        """
+    )
 
-    **Human review.** Automated tests establish calculation and fallback behavior. Desktop/narrow layout, keyboard/focus, contrast, and judge presentation still require attended human review.
-    """)
+with st.expander("Separate Universitywide context", expanded=False):
+    st.caption("Universitywide counts students admitted to at least one UC; it is not the sum of campus rows and is never included in the ranking.")
+    uw = universitywide_context(data)
+    st.dataframe(
+        uw.rename(columns={"fall_term": "Fall year", "applicants": "Applicants", "admits": "Admits", "actual_rate": "Actual admission rate"}),
+        hide_index=True,
+        width="stretch",
+    )
 
-with st.expander("Optional Profile Context Explorer"):
-    st.caption("Temporary, qualitative context only. Nothing is written to disk. Never use this feature to request admission odds, probability, guarantees, or a ranking of personal worth.")
+with st.expander("Optional profile context — not a prediction tool", expanded=False):
+    st.caption("Temporary, qualitative context only. Nothing is written to disk or used to calculate admission odds, probability, guarantees, or personal rankings.")
     if snapshot is None:
         st.info("Select a persistent school-campus result first.")
     else:

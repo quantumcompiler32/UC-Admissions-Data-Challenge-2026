@@ -35,3 +35,27 @@ def test_campus_year_context_is_weighted_and_excludes_2022():
     assert context["fall_term"].tolist() == [2017]
     assert context.loc[0, "actual_rate"] == .46
     assert context.loc[0, "expected_rate"] == .47
+
+
+def test_campus_year_context_searches_school_before_rollup():
+    rows = [
+        {"fall_term": 2017, "campus": "Berkeley", "atp_code": "A", "high_school": "Test", "city": "Town", "applicants": 10, "admits": 1, "expected_admit_rate": .20},
+        {"fall_term": 2017, "campus": "Berkeley", "atp_code": "B", "high_school": "Other School", "city": "Other City", "applicants": 90, "admits": 45, "expected_admit_rate": .50},
+        {"fall_term": 2018, "campus": "Davis", "atp_code": "A", "high_school": "Test", "city": "Town", "applicants": 20, "admits": 4, "expected_admit_rate": .30},
+    ]
+    context = campus_year_context(pd.DataFrame(rows), school_query="test")
+    assert context[["fall_term", "campus"]].to_dict("records") == [
+        {"fall_term": 2017, "campus": "Berkeley"},
+        {"fall_term": 2018, "campus": "Davis"},
+    ]
+    assert context["applicants"].tolist() == [10, 20]
+
+
+def test_campus_year_context_can_follow_visible_persistent_pairs():
+    rows = [
+        {"fall_term": 2017, "campus": "Berkeley", "atp_code": "A", "high_school": "Test", "city": "Town", "applicants": 10, "admits": 1, "expected_admit_rate": .20},
+        {"fall_term": 2017, "campus": "Berkeley", "atp_code": "B", "high_school": "Other", "city": "Town", "applicants": 90, "admits": 45, "expected_admit_rate": .50},
+    ]
+    keys = pd.DataFrame([{"atp_code": "A", "campus": "Berkeley"}])
+    context = campus_year_context(pd.DataFrame(rows), persistent_keys=keys)
+    assert context.loc[0, "applicants"] == 10

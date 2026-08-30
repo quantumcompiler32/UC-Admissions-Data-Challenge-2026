@@ -178,9 +178,22 @@ def universitywide_context(frame: pd.DataFrame) -> pd.DataFrame:
     return context.sort_values("fall_term", ignore_index=True)
 
 
-def campus_year_context(frame: pd.DataFrame) -> pd.DataFrame:
-    """Return applicant-weighted actual, expected, and residual rates by campus/year."""
+def campus_year_context(
+    frame: pd.DataFrame,
+    school_query: str = "",
+    persistent_keys: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame:
+    """Return applicant-weighted campus/year context for the visible gap scope."""
     eligible = _eligible_rows(frame)
+    if school_query.strip():
+        needle = school_query.strip().casefold()
+        eligible = eligible[
+            eligible["high_school"].fillna("").astype(str).str.casefold().str.contains(needle, regex=False)
+            | eligible["city"].fillna("").astype(str).str.casefold().str.contains(needle, regex=False)
+        ]
+    if persistent_keys is not None:
+        keys = persistent_keys[["atp_code", "campus"]].drop_duplicates()
+        eligible = eligible.merge(keys, on=["atp_code", "campus"], how="inner")
     grouped = eligible.groupby(["fall_term", "campus"], as_index=False).agg(
         applicants=("applicants", "sum"), admits=("admits", "sum")
     )
