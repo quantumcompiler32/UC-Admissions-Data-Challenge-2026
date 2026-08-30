@@ -33,32 +33,33 @@ should be deployed early; and the team submits a GitHub repository link with a
 methodology README and presents the dashboard. The visible rubric covers the
 question, finding, rigor, dashboard accuracy/reliability, and presentation.
 
-The deck does not specify the final Phase 2 question or detailed Gemini award
-criteria. See `docs/REFERENCE-DECK.md` for the source-fact and decision
-boundary.
+The deck does not prescribe a Phase 2 question; it directs each team to develop
+its own. The team-selected question is recorded below. Detailed Gemini award
+criteria remain unspecified. See `docs/REFERENCE-DECK.md` for the source-fact
+and decision boundary.
 
 ## Analytical question status
 
-The organizer's event question is still pending. Until it arrives, the team has
-confirmed this provisional question contract in the first grill round:
+The team selected this dashboard question through `grill-with-docs`:
 
-> Which California public high-school sites show persistent above- or
-> below-baseline UC admission rates, and how do those deviations vary by campus
-> and year?
+> Among California public-high-school applicants represented in the data, which
+> high-school-site and UC-campus combinations showed persistent,
+> applicant-weighted actual-minus-provided-expected admission-rate gaps during
+> 2017–2025, excluding 2022 when the baseline is unavailable, and how did those
+> gaps vary by campus and year?
 
 The comparison unit is one school site × one UC campus × one fall year. The main
 residual window is 2017–2025, with 2022 shown as a coverage gap. The population
 is the represented California public-high-school applicant records; campus rows
 are primary, while `Universitywide` is separate context. The metric is the
 applicant-weighted actual admission rate minus the provided expected admission
-rate, expressed in percentage points. This is not yet the final event question.
-When the prompt arrives, the team must run `grill-with-docs` again and confirm
-whether this direction remains suitable. Any selected question is descriptive
-and does not claim that school characteristics, campus practices, or policy
-changes cause the observed deviations.
+rate, expressed in percentage points. Revisit this contract only if live
+organizer instructions conflict with it. The question is descriptive and does
+not claim that school characteristics, campus practices, or policy changes cause
+the observed deviations.
 
 The primary pattern is persistence across years, not a single-year extreme.
-For the provisional analysis, persistence means at least three residual years
+For this analysis, persistence means at least three residual years
 with at least 80% of observed residuals on the same side of zero. Rankings use
 pooled applicant-weighted residuals and are split into positive and negative
 patterns. No arbitrary applicant-volume cutoff is imposed; applicant volume
@@ -68,9 +69,8 @@ In plain language, a persistent school-campus gap is a repeated difference for
 the same high-school site and UC campus between its actual admission rate and
 the provided expected rate. A one-year spike alone is not the primary story.
 
-The evidence hierarchy puts persistent school-campus deviations first, with
-campus and year rollups as context. A “systematic” pattern is a directionally
-consistent residual across at least three observed years.
+The evidence hierarchy puts persistent school-campus gaps first, with campus
+and year rollups as context.
 
 ## Working design defaults
 
@@ -132,9 +132,9 @@ consistent residual across at least three observed years.
 - Aggregate actual and expected rates use applicant weighting: expected admits
   are calculated as applicants × provided expected rate, then pooled before
   dividing. Residual is pooled actual rate minus pooled expected rate.
-- A “systematic” pattern requires at least three observed residual years with a
-  directionally consistent gap. Applicant volume and coverage remain visible;
-  no arbitrary small-school cutoff has been selected.
+- A persistent pattern requires at least three residual years with at least 80%
+  of observed residuals on the same side of zero. Applicant volume and coverage
+  remain visible; no arbitrary small-school cutoff has been selected.
 - School labels are displayed as `high_school + city`; `atp_code` remains the
   internal identity and is available in detail views.
 - The 2022 residual gap is shown as “baseline unavailable”; it is never
@@ -149,6 +149,10 @@ consistent residual across at least three observed years.
   README, so it must be labeled as provided and not presented as causal truth.
 - **Admission-rate residual**: actual admission rate minus expected admission
   rate, expressed in percentage points where both values are available.
+- **Persistent school-campus gap**: an admission-rate residual observed for the
+  same school site and campus in at least three residual years, with at least
+  80% of observed residuals on the same side of zero. Avoid “systematic gap,”
+  which can imply causation or an institutional mechanism not established here.
 - **Positive gap**: a positive residual; the observed actual admission rate is
   above the provided expected rate.
 - **Negative gap**: a negative residual; the observed actual admission rate is

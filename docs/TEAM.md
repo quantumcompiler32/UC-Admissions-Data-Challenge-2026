@@ -10,9 +10,9 @@
 - GitHub collaborator invitations: sent; acceptance is pending
 - Submission target: all three challenge categories
 
-The repository account is not assumed to identify a specific human. Personal
-names and GitHub handles are intentionally left unassigned until the team
-provides them.
+The repository account is not assumed to identify a specific human. Team names
+are recorded below; GitHub handles remain unassigned until collaborator
+acceptance is verified.
 
 ## People and role ownership
 
@@ -39,9 +39,11 @@ GitHub Issue or commit message.
 ### Accepted working defaults
 
 - Audience: competition judges and generalist data reviewers.
-- Planning hypothesis, pending the organizer's event question: which
-  California public high-school sites show persistent above- or below-baseline
-  UC admission rates, and how do those deviations vary by campus and year?
+- Selected question: among represented California public-high-school applicants,
+  which high-school-site and UC-campus combinations showed persistent,
+  applicant-weighted actual-minus-provided-expected admission-rate gaps during
+  2017–2025, excluding the 2022 baseline gap, and how did those gaps vary by
+  campus and year?
 - Data contract: the population, grain, weighted-rate rule, redaction rule,
   `Universitywide` treatment, coverage rule, and descriptive claim boundary in
   `CONTEXT.md`.
@@ -63,13 +65,10 @@ GitHub Issue or commit message.
 
 ### Still open
 
-- The Phase 2 dashboard question has not arrived. Run `grill-with-docs` when it
-  does, before building the final dashboard.
 - The construction and provenance of `expected_admit_rate` are not documented
   in the supplied data README. Until clarified, label it as a provided
   baseline.
-- The names, GitHub handles, and ownership confirmation for the three team
-  members are not yet supplied.
+- GitHub handles and collaborator acceptance remain unverified.
 
 ## Visual directions considered
 
@@ -94,11 +93,9 @@ primary claim.
 3. At Phase 2 start, the Dashboard owner leads the Streamlit path, Ranveer
    audits the completed Phase 1 evidence and technical foundations, and Rathin
    handles bounded reproducibility and presentation support.
-4. When the organizer's dashboard question arrives, run `grill-with-docs` and
-   update `CONTEXT.md`/ADRs with the question-specific decisions.
-5. Convert the confirmed dashboard design into a small spec and GitHub Issues
+4. Convert the confirmed dashboard design into a small spec and GitHub Issues
    before implementation.
-6. Build one vertical slice test-first, then verify the data calculations,
+5. Build one vertical slice test-first, then verify the data calculations,
    accessibility, responsive layout, cold start, and presentation path.
 
 ## Agent handoff protocol

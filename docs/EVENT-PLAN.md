@@ -11,11 +11,12 @@ that Phase 1 is complete:
 3. **UC Dashboard Construction — current Phase 2 focus**: build a Streamlit
    dashboard that answers one precise, important question about UC admissions.
 
-The slide deck adds a visible dashboard rubric and workflow constraints. It does
-not provide numeric tolerance, presentation length, Gemini judging details,
-API-key provisioning, or a final Phase 2 question. Treat those as organizer
-questions, not assumptions. The extracted deck facts and decision boundary are
-in `docs/REFERENCE-DECK.md`.
+The slide deck adds a visible dashboard rubric and workflow constraints. It
+directs each team to develop its own dashboard question but does not provide
+numeric tolerance, presentation length, Gemini judging details, or API-key
+provisioning. Treat those operational details as organizer questions, not
+assumptions. The extracted deck facts and decision boundary are in
+`docs/REFERENCE-DECK.md`.
 
 ## Operating principle
 
@@ -29,17 +30,15 @@ destabilize dashboard correctness or require live network access at judging.
 | Lane | Primary owner | First responsibility | Shared output |
 | --- | --- | --- | --- |
 | Phase 1 evidence | Ranveer (Veer): Data + Phase 1 evidence | Own the completed answer ledger, formulas, filters, denominators, and verified metrics. | Reusable metric evidence and calculation notes. |
-| Dashboard Construction | Moksh: Dashboard + UX | Own the Streamlit shell and data views, then run `grill-with-docs` immediately when the real dashboard question arrives. | Question-led dashboard and presentation path. |
+| Dashboard Construction | Moksh: Dashboard + UX | Own the confirmed question, Streamlit shell, data views, and presentation path. | Question-led dashboard and presentation path. |
 | Gemini API | Person 1: Ranveer, with Person 3: Rathin supporting | Build one narrow AI capability with a deterministic non-API fallback and clear source context. | Gemini demo, source notes, fallback, and presentation evidence. |
 
 The three people should cross-review one another's numbers. The lane owner is
 responsible for the decision and handoff, not the only person allowed to edit.
 
-## Before the Phase 2 dashboard question arrives
+## Before implementation
 
-- Keep the current residual analysis as a planning hypothesis only.
-- Do not build the final dashboard story before the organizer's question is
-  known.
+- Use the selected question and accepted grill contract in `CONTEXT.md`.
 - Audit and organize the completed Phase 1 answer ledger; do not redo the sprint
   unless a specific calculation needs verification.
 - Keep the tracked `Data/` package and `Data/README.md` as the shared source.
@@ -54,15 +53,15 @@ responsible for the decision and handoff, not the only person allowed to edit.
   Gemini summarizes a small, already-computed selection snapshot and its
   limitations for a judge.
 
-## When the Phase 2 dashboard question arrives
+## If live organizer instructions change the question
 
-1. Capture the exact wording and any required population, year, campus, or
+1. Capture the changed wording and any required population, year, campus, or
    output format in a GitHub Issue.
 2. Pause speculative dashboard work.
 3. Run `grill-with-docs` to settle audience, analytical question, population,
    numerator, denominator, comparison, visual evidence, limitation, and claim
    boundary.
-4. Compare the prompt against the current planning hypothesis; keep, narrow, or
+4. Compare the instruction against the selected question; keep, narrow, or
    replace it explicitly in `CONTEXT.md` and an ADR when the tradeoff warrants
    one.
 5. Convert the result into a small spec and implementation issues.

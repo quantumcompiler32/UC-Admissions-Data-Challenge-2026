@@ -1,6 +1,6 @@
 # ADR-0001: Question-led residual analysis as the dashboard spine
 
-- Status: Accepted planning direction; revisit when the event question arrives
+- Status: Accepted
 - Date: 2026-08-30
 
 ## Context
@@ -16,11 +16,13 @@ must be disambiguated with `atp_code`.
 
 ## Decision
 
-The planning direction is:
+The selected question is:
 
-> Which California public high-school sites show persistent above- or
-> below-baseline UC admission rates, and how do those deviations vary by campus
-> and year?
+> Among California public-high-school applicants represented in the data, which
+> high-school-site and UC-campus combinations showed persistent,
+> applicant-weighted actual-minus-provided-expected admission-rate gaps during
+> 2017–2025, excluding 2022 when the baseline is unavailable, and how did those
+> gaps vary by campus and year?
 
 The information architecture is narrative-first. Persistent school-campus
 deviations are the primary evidence; applicant-weighted campus/year rollups are
@@ -30,8 +32,9 @@ denominator context.
 The visual direction is **Residual Observatory**: an editorial evidence-led
 surface organized around a labeled zero line and a diverging residual scale.
 The expected rate is labeled as a provided baseline, not causal truth. A
-systematic pattern requires a directionally consistent residual across at least
-three observed years, with applicant volume and coverage visible.
+persistent pattern requires at least three residual years with at least 80% of
+observed residuals on the same side of zero, with applicant volume and coverage
+visible.
 
 ## Alternatives considered
 

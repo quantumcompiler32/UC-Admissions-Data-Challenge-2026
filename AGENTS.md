@@ -19,7 +19,9 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 
 - Phase 1, the UC Question Sprint, is complete. Do not plan or redo the sprint
   as active work; preserve and reuse its answer ledger and verified metrics.
-- The team is preparing for Phase 2: the dashboard question is still pending.
+- The team is preparing for Phase 2 implementation. The organizer deck directs
+  teams to develop their own question, and this team's question is settled in
+  `CONTEXT.md`.
 - The submission target is all three challenge categories; each requires a
   distinct evidence path even if the dashboard and Gemini feature share one
   Streamlit application.
@@ -31,20 +33,18 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   Streamlit, Ranveer leads technical/data work, and Rathin handles bounded
   reproducibility and presentation support.
 - The dashboard audience is competition judges and generalist data reviewers.
-- The organizer's event question is still pending. The accepted planning
-  hypothesis is: which California public high-school sites show persistent
-  above- or below-baseline UC admission rates, and how do those deviations vary
-  by campus and year?
+- The selected question asks which represented high-school-site and UC-campus
+  combinations showed persistent applicant-weighted actual-minus-provided-
+  expected admission-rate gaps during 2017–2025, excluding the 2022 baseline
+  gap, and how those gaps varied by campus and year.
 - The accepted planning defaults are the data contract in `CONTEXT.md`, a
   narrative-first information architecture, and the Residual Observatory
-  visual direction. They must be revalidated against the event question.
+  visual direction. Revisit them only if live organizer instructions conflict.
 - Keep the Admissions Ledger and Policy Timeline directions documented as
   alternatives; do not silently replace the accepted direction.
-- When the event question arrives, run `grill-with-docs` before implementation.
-  Reconfirm the audience, analytical question, population, numerator,
-  denominator, comparison, visual evidence, and limitation.
-- Do not build the final dashboard around the planning hypothesis until that
-  grill is complete.
+- The grill is complete through the current decision frontier. Convert the
+  decisions into a spec and implementation tickets before building the final
+  dashboard.
 
 ## Collaboration rules
 

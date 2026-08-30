@@ -77,7 +77,8 @@ feature target without claiming a rubric requirement that is not documented.
 
 ## Still not specified by this deck
 
-The deck does not define the final Phase 2 question, Gemini API requirements,
-numeric tolerances, presentation length, deployment credentials, or whether the
-organizers require separate repository links for each track. Those remain open
-until confirmed by the organizers or the submission form.
+The deck does not prescribe the team's final Phase 2 question; it instructs the
+team to develop one. It also does not specify Gemini API requirements, numeric
+tolerances, presentation length, deployment credentials, or whether the
+organizers require separate repository links for each track. Those operational
+details remain open until confirmed by the organizers or submission form.

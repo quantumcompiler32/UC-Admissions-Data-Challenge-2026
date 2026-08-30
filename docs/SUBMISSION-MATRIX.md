@@ -9,7 +9,7 @@ contract rather than a guarantee of eligibility.
 | --- | --- | --- | --- |
 | Best Use of the Google Gemini API | A user-facing Gemini capability with a documented API call, source-grounded context, demo path, and fallback | Ranveer, with Rathin documenting the demo | Planned: “Explain this view”; optional Profile Context Explorer |
 | UC Question Sprint | Completed ten numeric auto-graded answers plus the answer ledger, formulas, filters, and verification notes | Ranveer | Phase 1 complete; ledger still needs to be added to the shared repo if available |
-| UC Dashboard Construction | Streamlit app answering the exact Phase 2 question, with visible methodology, reproducible metrics, and presentation-ready startup | Moksh | Pending the organizer’s Phase 2 question and grill |
+| UC Dashboard Construction | Streamlit app answering the selected question, with visible methodology, reproducible metrics, and presentation-ready startup | Moksh | Grill complete; ready for spec and implementation |
 
 ## Dashboard rubric checklist
 
@@ -47,7 +47,7 @@ Before submission, confirm:
 
 ## Phase 2 gate
 
-When the organizer provides the dashboard question, run `grill-with-docs` before
-building the final story. Update `CONTEXT.md`, this matrix, and the relevant ADR
-with the exact question, population, denominator, comparison, visual evidence,
-and limitation.
+If live organizer instructions change the dashboard question, run
+`grill-with-docs` before changing the final story. Update `CONTEXT.md`, this
+matrix, and the relevant ADR with the exact question, population, denominator,
+comparison, visual evidence, and limitation.

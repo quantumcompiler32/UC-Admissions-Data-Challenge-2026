@@ -22,16 +22,18 @@ Submission target: all three challenge categories shown in the event form.
    added there afterward.
 6. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
    and verified metrics.
-7. Wait for the Phase 2 dashboard question. Then run the `grill-with-docs`
-   workflow before committing to the final dashboard story.
+7. Review the selected dashboard question and completed grill in `CONTEXT.md`,
+   then convert it into the implementation spec and tickets.
 
-## Current planning state
+## Selected dashboard question
 
-The Phase 2 dashboard question is not yet available. The current planning hypothesis is to
-investigate persistent above- or below-baseline UC admission-rate differences by
-school site, campus, and year. It is a starting point, not the final question.
+> Among California public-high-school applicants represented in the data, which
+> high-school-site and UC-campus combinations showed persistent,
+> applicant-weighted actual-minus-provided-expected admission-rate gaps during
+> 2017–2025, excluding 2022 when the baseline is unavailable, and how did those
+> gaps vary by campus and year?
 
-The planning defaults are:
+The accepted design contract is:
 
 - audience: competition judges and generalist data reviewers;
 - narrative-first information architecture;
