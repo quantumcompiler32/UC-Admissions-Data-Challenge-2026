@@ -8,7 +8,8 @@ import streamlit as st
 
 from analysis import (
     RESIDUAL_YEARS, calculate_persistent_gaps, filter_gaps, gap_detail,
-    load_dashboard_data, snapshot_for_gap, universitywide_context,
+    campus_year_context, load_dashboard_data, snapshot_for_gap,
+    universitywide_context,
 )
 from gemini import client_from_environment, explain_view
 from profile import build_redacted_payload, clear_profile_payload, explain_profile
@@ -63,6 +64,25 @@ if ranking.empty:
 else:
     st.bar_chart(ranking.set_index("school")["residual_pp"], horizontal=True)
     st.dataframe(ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(columns={"direction_label": "Direction", "residual_pp": "Residual (percentage points)", "pooled_applicants": "Pooled applicants", "years_observed": "Years observed", "limited_evidence": "Limited evidence"}), hide_index=True, width="stretch")
+
+st.subheader("Campus and year context")
+st.caption("Applicant-weighted rollups show how residuals vary by campus and year; they do not redefine the fixed persistence rule.")
+context = campus_year_context(data).copy()
+context["residual_pp"] = context["residual"] * 100
+context["campus_year"] = context["campus"] + " · " + context["fall_term"].astype(int).astype(str)
+st.bar_chart(context.set_index("campus_year")["residual_pp"], horizontal=True)
+st.dataframe(
+    context[["fall_term", "campus", "applicants", "admits", "actual_rate", "expected_rate", "residual_pp"]].rename(
+        columns={
+            "fall_term": "Fall year", "campus": "Campus", "applicants": "Applicants",
+            "admits": "Admits", "actual_rate": "Actual rate",
+            "expected_rate": "Provided expected rate",
+            "residual_pp": "Residual (percentage points)",
+        }
+    ),
+    hide_index=True,
+    width="stretch",
+)
 
 st.subheader("School-campus detail")
 if not filtered.empty:
