@@ -111,8 +111,10 @@ Question Sprint evidence.
 - `expected_admit_rate` provenance is not documented; keep the provided-baseline
   label unless organizers clarify it.
 - GitHub handles and collaborator acceptance remain unverified.
-- Veer’s completed Question Sprint notebook/answer ledger still needs to be
-  added or linked.
+- Veer’s completed Question Sprint notebook and rerun ledger are now preserved
+  in `notebooks/UC_Question_Sprint_Pandas.ipynb` and
+  `docs/QUESTION-SPRINT-LEDGER.md`; organizer auto-grader confirmation remains
+  required.
 - Streamlit deployment credentials and final submission mechanics require a
   human check.
 - The 306/204/102 audit must be reproduced by committed analysis code and tests

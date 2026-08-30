@@ -27,6 +27,9 @@ Submission target: all three challenge categories shown in the event form.
 8. Review the selected dashboard question and completed grill in `CONTEXT.md`,
    then convert it into the implementation spec and tickets.
 
+The preserved Phase 1 notebook and rerun ledger are documented in
+[docs/QUESTION-SPRINT-LEDGER.md](docs/QUESTION-SPRINT-LEDGER.md).
+
 ## Run the Wave One dashboard
 
 ```bash
