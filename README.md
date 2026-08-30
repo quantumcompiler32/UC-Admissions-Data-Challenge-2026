@@ -3,6 +3,8 @@
 Shared starter repository for the three-person team competing in the UC
 Admissions Data Challenge.
 
+Submission target: all three challenge categories shown in the event form.
+
 ## Start here
 
 1. Read [AGENTS.md](AGENTS.md), [docs/TEAM.md](docs/TEAM.md), and
@@ -40,6 +42,9 @@ The intended Gemini feature is a source-grounded “Explain this view” compani
 deterministic Python computes the numbers, and Gemini explains a selected
 aggregate snapshot. The dashboard must still run without `GEMINI_API_KEY` or
 network access.
+
+See [docs/SUBMISSION-MATRIX.md](docs/SUBMISSION-MATRIX.md) for the evidence
+required for each submission category.
 
 ## Collaboration
 

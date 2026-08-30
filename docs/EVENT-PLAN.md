@@ -4,7 +4,7 @@ This plan incorporates the user-provided event card screenshot. It describes
 three challenge tracks and records that Phase 1 is complete:
 
 1. **Best Use of the Google Gemini API**: an intended focused AI-powered
-   companion capability, isolated from dashboard correctness.
+   capability, isolated from dashboard correctness.
 2. **UC Question Sprint — Phase 1 complete**: ten UC Admissions questions with
    numeric, auto-graded values. Reuse its answer ledger and verified metrics.
 3. **UC Dashboard Construction — current Phase 2 focus**: build a Streamlit
@@ -17,9 +17,9 @@ provisioning. Treat those as organizer questions, not assumptions.
 ## Operating principle
 
 Use the completed Phase 1 sprint as a verified evidence base, then focus current
-work on the Phase 2 dashboard. The Gemini experiment remains optional and
-isolated so it cannot destabilize the dashboard or require live network access
-at judging.
+work on the Phase 2 dashboard and the grounded Gemini capability. The Gemini
+feature may share the dashboard application but remains isolated so it cannot
+destabilize dashboard correctness or require live network access at judging.
 
 ## Three-person lane assignment
 
@@ -115,6 +115,6 @@ Before submission, all three lanes must confirm:
 - the dashboard starts locally from a clean checkout;
 - every visible number can be recomputed from the tracked data;
 - the completed Phase 1 sprint answers have been independently checked;
-- Gemini behavior is clearly labeled as optional and source-grounded;
+- Gemini behavior is clearly labeled as generated and source-grounded;
 - the presentation states the question, population, denominator, result, and
   limitation in under a minute.

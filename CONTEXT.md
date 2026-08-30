@@ -13,9 +13,9 @@ the denominator, comparison baseline, coverage, and limitations visible.
   metrics are reusable evidence, not active work.
 - **Dashboard Construction**: the current Phase 2 workstream: a Streamlit
   dashboard that answers one precise, important UC admissions question.
-- **Gemini API track**: a separate opportunity to build a focused AI-powered
-  app. It is optional to the dashboard and must not become a required network or
-  API-key dependency.
+- **Gemini API track**: an intended submission category using a focused
+  AI-powered capability. It may share the Streamlit app, but must not become a
+  required network or API-key dependency for the dashboard.
 
 ## Analytical question status
 

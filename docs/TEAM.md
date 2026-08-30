@@ -8,6 +8,7 @@
 - Repository account: `quantumcompiler32`
 - Human team size: three people
 - GitHub collaborator invitations: sent; acceptance is pending
+- Submission target: all three challenge categories
 
 The repository account is not assumed to identify a specific human. Personal
 names and GitHub handles are intentionally left unassigned until the team

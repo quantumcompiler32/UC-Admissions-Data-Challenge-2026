@@ -10,12 +10,17 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
    limitations.
 5. `docs/research/ui-ux-dashboard-skills.md` for dashboard design guidance.
 6. `docs/EVENT-PLAN.md` for the three-track event plan and handoff sequence.
+7. `docs/SUBMISSION-MATRIX.md` for the evidence required to submit to all
+   three challenge categories.
 
 ## Current product status
 
 - Phase 1, the UC Question Sprint, is complete. Do not plan or redo the sprint
   as active work; preserve and reuse its answer ledger and verified metrics.
 - The team is preparing for Phase 2: the dashboard question is still pending.
+- The submission target is all three challenge categories; each requires a
+  distinct evidence path even if the dashboard and Gemini feature share one
+  Streamlit application.
 - Ownership is documented in `docs/TEAM.md`: the Dashboard owner leads UX and
   Streamlit, Ranveer leads technical/data work, and Rathin handles bounded
   reproducibility and presentation support.
