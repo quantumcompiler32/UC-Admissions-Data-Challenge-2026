@@ -51,6 +51,17 @@ whether this direction remains suitable. Any selected question is descriptive
 and does not claim that school characteristics, campus practices, or policy
 changes cause the observed deviations.
 
+The primary pattern is persistence across years, not a single-year extreme.
+For the provisional analysis, persistence means at least three residual years
+with at least 80% of observed residuals on the same side of zero. Rankings use
+pooled applicant-weighted residuals and are split into positive and negative
+patterns. No arbitrary applicant-volume cutoff is imposed; applicant volume
+and coverage are shown as evidence strength and limitation context.
+
+In plain language, a persistent school-campus gap is a repeated difference for
+the same high-school site and UC campus between its actual admission rate and
+the provided expected rate. A one-year spike alone is not the primary story.
+
 The evidence hierarchy puts persistent school-campus deviations first, with
 campus and year rollups as context. A “systematic” pattern is a directionally
 consistent residual across at least three observed years.
@@ -63,6 +74,11 @@ consistent residual across at least three observed years.
   organized around the zero line and actual-versus-expected comparisons.
 - Supporting detail: Admissions Ledger principles, keeping counts and
   denominator context adjacent to rates.
+
+- First-screen job: make the above- or below-baseline pattern understandable
+  immediately, with the time window, population, and metric visible.
+- Supporting flow: campus/year context followed by clickable school-campus
+  detail; Policy Timeline remains context rather than the primary story.
 
 ## Population and grain
 
@@ -108,6 +124,10 @@ consistent residual across at least three observed years.
   README, so it must be labeled as provided and not presented as causal truth.
 - **Admission-rate residual**: actual admission rate minus expected admission
   rate, expressed in percentage points where both values are available.
+- **Residual year**: a fall year with enough actual, expected, and count data to
+  calculate an admission-rate residual for the selected school-campus unit. In
+  this dataset those years are 2017–2021 and 2023–2025; 2022 is a coverage gap,
+  not a zero or a reversal.
 - **Universitywide**: a separate UC-wide aggregate representing admission to at
   least one UC. It is not the sum of the nine campus rows.
 - **Redacted value**: a blank count that may mean hidden or none. It remains
