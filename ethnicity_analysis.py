@@ -122,9 +122,12 @@ def campus_matrix(
     entrant_level: str,
     year: int,
     metric: str,
+    ethnicities: Optional[Iterable[str]] = None,
 ) -> pd.DataFrame:
     if metric not in METRIC_LABELS:
         raise ValueError(f"Unsupported metric: {metric}")
     rows = filter_metrics(metrics, entrant_level=entrant_level, years=[year])
     rows = rows[rows["campus"] != "Systemwide"]
+    if ethnicities is not None:
+        rows = rows[rows["ethnicity"].isin(list(ethnicities))]
     return rows.pivot(index="ethnicity", columns="campus", values=metric).sort_index()

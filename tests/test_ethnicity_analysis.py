@@ -42,6 +42,8 @@ def test_change_findings_and_campus_matrix():
     matrix = campus_matrix(metrics, entrant_level="freshman", year=2025, metric="admission_rate")
     assert matrix.loc["A", "Davis"] == .5
     assert matrix.loc["B", "Davis"] == .25
+    filtered_matrix = campus_matrix(metrics, entrant_level="freshman", year=2025, metric="admission_rate", ethnicities=["A"])
+    assert list(filtered_matrix.index) == ["A"]
 
 
 def test_duplicate_keys_are_rejected():

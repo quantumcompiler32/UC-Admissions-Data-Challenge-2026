@@ -133,12 +133,12 @@ with overview_tab:
     composition = systemwide.pivot(index="fall_term", columns="ethnicity", values="application_share")[GROUP_ORDER]
     st.markdown("#### How the application pool changed")
     st.area_chart(composition, height=390)
-    st.caption("Each year sums to 100% across the eight reported dataset categories. International and Unknown are displayed categories, not racial identities.")
+    st.caption("This composition view includes all eight reported dataset categories and sums to 100% each year. International and Unknown are displayed categories, not racial identities.")
 
     st.markdown(f"#### {METRIC_LABELS[selected_metric]} by reported group in {selected_year}")
-    year_rows = active.set_index("ethnicity").reindex(GROUP_ORDER).dropna(subset=[selected_metric])
+    year_rows = active[active["ethnicity"].isin(selected_groups)].set_index("ethnicity").reindex(selected_groups).dropna(subset=[selected_metric])
     st.bar_chart(year_rows[[selected_metric]].rename(columns={selected_metric: METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
-    display = active[["ethnicity", "applicants", "admits", "enrollees", "application_share", "admission_rate", "yield_rate"]].sort_values(selected_metric, ascending=False)
+    display = active[active["ethnicity"].isin(selected_groups)][["ethnicity", "applicants", "admits", "enrollees", "application_share", "admission_rate", "yield_rate"]].sort_values(selected_metric, ascending=False)
     st.dataframe(display.rename(columns={"ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees","application_share":"Application share","admission_rate":"Admission rate","yield_rate":"Enrollment yield"}), hide_index=True, width="stretch", column_config={"Application share":st.column_config.NumberColumn(format="%.1f%%"),"Admission rate":st.column_config.NumberColumn(format="%.1f%%"),"Enrollment yield":st.column_config.NumberColumn(format="%.1f%%")})
 
 with trends_tab:
@@ -157,7 +157,7 @@ with campus_tab:
     st.bar_chart(campus_rows.set_index("campus")[[selected_metric]].rename(columns={selected_metric:METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
     st.caption("Campus rows count applications to each campus. They are not additive student totals, and Systemwide is not an average campus.")
     st.markdown("#### All reported groups by campus")
-    matrix = campus_matrix(metrics, entrant_level=entrant_level, year=selected_year, metric=selected_metric)
+    matrix = campus_matrix(metrics, entrant_level=entrant_level, year=selected_year, metric=selected_metric, ethnicities=selected_groups)
     st.dataframe(matrix, width="stretch", column_config={column:st.column_config.NumberColumn(format="%.1f%%") for column in matrix.columns})
 
 with gpa_tab:
