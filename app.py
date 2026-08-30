@@ -152,10 +152,13 @@ st.set_page_config(page_title="UC Admissions: Representation, Admission & Enroll
 st.markdown("""
 <style>
 :root { --ink:#10233f; --muted:#5d6d82; --blue:#0759a8; --blue-soft:#eaf3ff; --yellow:#ffc928; --yellow-soft:#fff8d8; --line:#d9e4f1; }
+html, body { overflow-x:hidden; }
 .stApp { background:#f7faff; color:var(--ink); }
-.block-container { max-width:1400px; padding:1.4rem 2rem 3rem; }
+.block-container { width:100%; max-width:1400px; box-sizing:border-box; padding:clamp(1rem,2.5vw,1.75rem) clamp(.75rem,3vw,2.5rem) clamp(2rem,5vw,3.5rem); }
 h1,h2,h3 { color:var(--ink); letter-spacing:-.035em; } h1 { font-size:clamp(2rem,4vw,3.35rem); line-height:1.04; margin-bottom:.4rem; }
 p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
+[data-testid="stHorizontalBlock"] { gap:clamp(.55rem,1.5vw,1.25rem); align-items:stretch; }
+[data-testid="stHorizontalBlock"] > [data-testid="stColumn"] { min-width:0; }
 [data-testid="stMetric"] { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem; box-shadow:0 5px 18px rgba(16,35,63,.05); }
 [data-testid="stMetricValue"] { color:var(--blue); font-variant-numeric:tabular-nums; }
 [data-testid="stTabs"] [role="tablist"] { gap:.35rem; border-bottom:1px solid var(--line); }
@@ -168,7 +171,21 @@ p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
 .pill { display:inline-block; background:var(--yellow-soft); color:#735900; border:1px solid #f3d66c; border-radius:999px; padding:.23rem .62rem; font-size:.78rem; font-weight:700; margin:.25rem .2rem 0 0; }
 .finding-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; min-height:112px; }
 .finding-card strong { color:var(--blue); }
-@media (max-width:640px) { .block-container { padding:1rem .75rem 2rem; } .hero { padding:1rem; } }
+@media (max-width:900px) {
+  [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] { flex:1 1 calc(50% - .5rem) !important; min-width:min(100%,14rem); }
+  [data-testid="stMetric"] { padding:.85rem; }
+}
+@media (max-width:640px) {
+  .block-container { padding-inline:.75rem; }
+  h1 { font-size:clamp(1.9rem,9vw,2.5rem); }
+  .hero { padding:1rem; }
+  .question { font-size:1rem; }
+  [data-testid="stHorizontalBlock"] { flex-direction:column; }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] { flex:1 1 100% !important; width:100% !important; }
+  [data-testid="stTabs"] [role="tablist"] { overflow-x:auto; scrollbar-width:thin; }
+  [data-testid="stTabs"] button[role="tab"] { flex:0 0 auto; white-space:nowrap; padding-inline:.7rem; }
+}
 </style>
 """, unsafe_allow_html=True)
 
