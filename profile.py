@@ -1,5 +1,6 @@
 """Privacy-bounded, non-persistent profile context helpers."""
 
+import json
 import re
 from typing import Any, Dict, Optional, Protocol
 
@@ -47,7 +48,7 @@ def profile_prompt(payload: Dict[str, str], snapshot: Dict[str, Any], request_te
         "Do not estimate admission odds, probability, guarantees, personal worth, "
         "or causal conclusions. State that aggregated data cannot determine an "
         "individual outcome. Return a JSON object with one string field named explanation.\n"
-        + str({"profile": payload, "request": request_text, "evidence": snapshot})
+        + json.dumps({"profile": payload, "request": request_text, "evidence": snapshot}, sort_keys=True)
     )
 
 

@@ -92,6 +92,12 @@ def gap_detail(frame: pd.DataFrame, atp_code: str, campus: str) -> pd.DataFrame:
     rows["residual"] = rows["actual_rate"] - rows["expected_rate"]
     rows["baseline_available"] = rows["expected_rate"].notna()
     rows["coverage_status"] = rows["baseline_available"].map({True: "Residual available", False: "Baseline unavailable"})
+    if 2022 not in set(rows["fall_term"].tolist()):
+        rows = pd.concat([rows, pd.DataFrame([{
+            "fall_term": 2022, "applicants": None, "admits": None,
+            "actual_rate": None, "expected_rate": None, "residual": None,
+            "baseline_available": False, "coverage_status": "Baseline unavailable",
+        }])], ignore_index=True)
     return rows[["fall_term", "applicants", "admits", "actual_rate", "expected_rate", "residual", "baseline_available", "coverage_status"]].sort_values("fall_term", ignore_index=True)
 
 

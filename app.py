@@ -118,11 +118,11 @@ with st.expander("Optional Profile Context Explorer"):
         st.info("Select a persistent school-campus result first.")
     else:
         with st.form("profile_form", clear_on_submit=False):
-            interests = st.text_input("Interests", max_chars=500)
-            coursework = st.text_input("Coursework", max_chars=500)
-            activities = st.text_area("Activities", max_chars=1000)
-            resume_text = st.text_area("Optional pasted resume text", max_chars=5000)
-            profile_request = st.text_input("What qualitative connection would you like explained?", max_chars=500)
+            interests = st.text_input("Interests", max_chars=500, key="profile_interests")
+            coursework = st.text_input("Coursework", max_chars=500, key="profile_coursework")
+            activities = st.text_area("Activities", max_chars=1000, key="profile_activities")
+            resume_text = st.text_area("Optional pasted resume text", max_chars=5000, key="profile_resume_text")
+            profile_request = st.text_input("What qualitative connection would you like explained?", max_chars=500, key="profile_request")
             preview = build_redacted_payload(interests, coursework, activities, resume_text)
             st.markdown("**Exact redacted payload preview**")
             st.json(preview)
@@ -137,5 +137,7 @@ with st.expander("Optional Profile Context Explorer"):
                 st.write(result["text"])
                 st.caption(f"Status: {result['reason']}. Profile data is not persisted by this app.")
     if st.button("Clear profile fields"):
-        st.session_state["profile_cleared"] = clear_profile_payload()
+        for key in ("profile_interests", "profile_coursework", "profile_activities", "profile_resume_text", "profile_request"):
+            st.session_state.pop(key, None)
+        clear_profile_payload()
         st.info("Profile fields cleared for this session. No profile data was stored by the app.")
