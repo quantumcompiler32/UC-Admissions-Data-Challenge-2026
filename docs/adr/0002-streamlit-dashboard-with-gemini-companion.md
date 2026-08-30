@@ -1,6 +1,6 @@
 # ADR-0002: Streamlit dashboard with a grounded Gemini companion
 
-- Status: Accepted planning direction
+- Status: Superseded in the UI by ADR-0003; adapter code retained
 - Date: 2026-08-30
 
 ## Context

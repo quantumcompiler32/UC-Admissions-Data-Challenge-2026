@@ -1,129 +1,104 @@
 # UC Admissions Data Challenge 2026
 
-Shared starter repository for the three-person team competing in the UC
-Admissions Data Challenge.
+Judge-facing Streamlit analysis for the UC Admissions Data Challenge, with the
+completed Question Sprint evidence preserved separately.
 
-Submission target: all three challenge categories shown in the event form.
+## Dashboard question
 
-## Start here
+> Among UC freshman applicants from 2017–2025, how did application share,
+> admission rate, and enrollment yield change across reported race and ethnicity
+> groups, and how did those patterns differ across campuses and years?
 
-1. Read [AGENTS.md](AGENTS.md), [docs/TEAM.md](docs/TEAM.md), and
-   [CONTEXT.md](CONTEXT.md).
-2. Read [docs/EVENT-PLAN.md](docs/EVENT-PLAN.md), the challenge brief, and the
-   dashboard UI/UX research:
-   [UC-Admissions-Data-Challenge.md](UC-Admissions-Data-Challenge.md) and
-   [docs/research/ui-ux-dashboard-skills.md](docs/research/ui-ux-dashboard-skills.md).
-3. Read [docs/REFERENCE-DECK.md](docs/REFERENCE-DECK.md) for the organizer
-   slide-deck constraints.
-4. Read [docs/GRILL-SUMMARY.md](docs/GRILL-SUMMARY.md) for the accepted
-   dashboard contract.
-5. Read [Data/README.md](Data/README.md) before calculating or interpreting a
-   metric.
-6. Review the assigned ownership in [docs/TEAM.md](docs/TEAM.md); collaborator
-   invitations are pending acceptance, and verified GitHub handles should be
-   added there afterward.
-7. Phase 1, the UC Question Sprint, is complete. Preserve its answer ledger
-   and verified metrics.
-8. Review the selected dashboard question and completed grill in `CONTEXT.md`,
-   then convert it into the implementation spec and tickets.
+The app uses `Data/uc_admissions_summary_by_ethnicity.csv` for the primary
+question. Freshmen are the primary population; transfer records are a secondary
+comparison.
 
-The preserved Phase 1 notebook and rerun ledger are documented in
-[docs/QUESTION-SPRINT-LEDGER.md](docs/QUESTION-SPRINT-LEDGER.md).
-
-## Run the Wave One dashboard
+## Run
 
 ```bash
 python3 -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The app uses tracked `Data/dashboard_data.csv` and does not require Gemini or
-network access. Run `python3 -m pytest -q` for the deterministic checks.
+Run deterministic checks with:
 
-For deployment, use Python 3.11 and the pinned `requirements.txt`. Streamlit
-Community Cloud can use `app.py` as its entrypoint. If `GEMINI_API_KEY` is not
-configured, “Explain this view” uses the deterministic local fallback and the
-core dashboard remains fully usable. A sample environment contract is in
-`.env.example`; never commit a real key.
+```bash
+python3 -m pytest -q
+```
 
-## Verified finding and methods
+## Metrics
 
-The committed analysis reproduces 306 persistent campus-specific school
-combinations: 204 positive and 102 negative. A combination requires at least
-three residual years, at least 80% of yearly residuals on one side of zero, and
-agreement between that dominant direction and its pooled applicant-weighted
-residual. Actual rates use pooled admits/applicants; expected rates use the
-provided `expected_admit_rate` weighted by applicants.
+- **Application share:** group applicants divided by applicants across all
+  eight reported categories for the same entrant level, campus, and year.
+- **Admission rate:** group admits divided by group applicants.
+- **Enrollment yield:** group enrollees divided by group admits.
 
-Residual-ready years are 2017–2021 and 2023–2025. Fall 2022 is explicitly
-“baseline unavailable.” Blank/redacted values are not zero-filled, and
-`Universitywide` is calculated as separate context rather than summed from
-campus rows. The result is descriptive aggregated evidence, not a causal,
-fairness, or individual-admission prediction.
+Rates are calculated from counts; percentages are never averaged. Missing
+counts remain unavailable. `Systemwide` is used only as its supplied aggregate
+and is never recreated by adding campus rows.
 
-See [docs/QA-CHECKLIST.md](docs/QA-CHECKLIST.md) for automated and attended
-verification status and [docs/DEMO.md](docs/DEMO.md) for the judge path.
+## Verified headline changes
 
-## Reproducible analysis notebook
+For supplied Systemwide freshman records from 2017 to 2025:
 
-[`notebooks/uc_persistent_gaps_colab.ipynb`](notebooks/uc_persistent_gaps_colab.ipynb)
-is a Colab-ready, self-contained analysis of the dashboard question. It uses
-Python/Pandas, preserves redacted values, excludes `Universitywide`, makes the
-2022 baseline gap explicit, reproduces the persistent-gap counts, and renders
-the zero-centered ranking plus campus/year context before the Streamlit app.
+- Asian application share rose 3.42 percentage points, the largest increase;
+  White application share fell 4.69 points, the largest decrease.
+- Pacific Islander admission rate rose 22.93 points, the largest increase;
+  International admission rate rose 1.88 points, the smallest increase.
+- American Indian enrollment yield rose 4.12 points; Hispanic/Latino(a) yield
+  fell 13.55 points, the largest decrease.
 
-## Selected dashboard question
+The 2025 Systemwide freshman scope contains 205,389 applicants, 148,676 admits,
+and 52,609 enrollees: a 72.4% aggregate admission rate and 35.4% aggregate
+yield. These are descriptive outcomes, not causal or fairness conclusions.
 
-> Among California public-high-school applicants represented in the data, which
-> high-school-site and UC-campus combinations showed persistent,
-> applicant-weighted actual-minus-provided-expected admission-rate gaps during
-> 2017–2025, excluding 2022 when the baseline is unavailable, and how did those
-> gaps vary by campus and year?
+## Dashboard sections
 
-The accepted design contract is:
+- **Overview:** headline changes, application composition, selected-year rates,
+  counts, and table evidence.
+- **Trends:** selected metric and reported groups across 2017–2025.
+- **Campus comparison:** one-group campus ranking and all-group campus matrix.
+- **GPA & major context:** prominent fall 2025 first-year discipline or Berkeley
+  transfer-major rates and supplied GPA percentile ranges.
+- **Historical explorer:** compatible aggregate school, ethnicity, discipline,
+  and transfer-major histories.
+- **Methods:** formulas, population, source categories, missingness, and claim
+  boundaries.
 
-- audience: competition judges and generalist data reviewers;
-- narrative-first information architecture;
-- Residual Observatory visual direction;
-- applicant-weighted rates and rollups;
-- `atp_code` as the school-site identity;
-- explicit missingness, redaction, `Universitywide`, and 2022 coverage rules.
+## GPA and historical benchmark boundary
 
-The exploratory audit found 306 persistent campus-specific school combinations:
-204 positive and 102 negative. This result remains provisional until committed
-analysis code and tests reproduce it. See
-[docs/research/persistent-gap-audit.md](docs/research/persistent-gap-audit.md).
+GPA, major, ethnicity, and school records are never joined into a personal
+estimate because the supplied files do not share an individual key. A user may
+compare a GPA with a supplied aggregate 25th–75th percentile range, but that
+comparison does not alter an admission rate or predict an individual outcome.
 
-The intended Gemini feature is a source-grounded “Explain this view” companion:
-deterministic Python computes the numbers, and Gemini explains a selected
-aggregate snapshot. A secondary Profile Context Explorer may summarize a
-user-provided profile or resume and relate declared interests to school-level
-evidence, but it must not estimate individual admission odds. Profile data is
-temporary and requires explicit confirmation before transmission. The
-dashboard must still run without `GEMINI_API_KEY` or network access.
+Named majors are available only for Berkeley transfers in fall 2025. The
+freshman source provides broad disciplines, not named majors.
 
-The intended judge-facing sequence is dashboard finding, “Explain this view,”
-then the Profile Context Explorer if presentation time allows.
+## Limitations
 
-The organizer deck's visible dashboard rubric is: question (time window,
-population, metric), concise and justifiable finding, nuanced and mature rigor,
-accurate and reliable dashboard, and well-understood presentation. See
-[docs/REFERENCE-DECK.md](docs/REFERENCE-DECK.md) for the full source/decision
-boundary.
+The records are aggregated. The dashboard does not establish that race or
+ethnicity caused an outcome and does not control for academic preparation,
+major, residency, application choices, or other factors. International and
+Unknown are source categories but are not racial identities. Small groups
+should be interpreted with their counts visible.
 
-See [docs/SUBMISSION-MATRIX.md](docs/SUBMISSION-MATRIX.md) for the evidence
-required for each submission category.
+## Repository map
 
-## Collaboration
+- `app.py`: Streamlit presentation layer
+- `ethnicity_analysis.py`: authoritative ethnicity calculations
+- `notebooks/uc_ethnicity_outcomes_colab.ipynb`: reproducible question-first
+  analysis and headline assertions
+- `benchmark.py` and `benchmark_ui.py`: aggregate Historical Admissions
+  Benchmark and GPA context
+- `tests/`: deterministic calculation and integration seams
+- `CONTEXT.md` and `docs/GRILL-SUMMARY.md`: accepted product contract
+- `docs/PRESENTATION-SPEECH.md`: judge-facing presentation script
+- `docs/QUESTION-SPRINT-LEDGER.md`: preserved Phase 1 evidence
 
-Use GitHub Issues for decisions and specifications. Keep facts, hypotheses,
-accepted decisions, implementation, and verification separate. Never claim
-causality from descriptive patterns, and never treat passing tests as proof that
-the presentation is ready.
+The former persistent residual analysis remains archived in `analysis.py`, its
+tests, notebook, research note, and superseded ADR. It is not the current
+dashboard question.
 
-## Data
-
-The public challenge data is tracked under `Data/` so each teammate and agent
-has the same starting point. The package contains the supplied CSVs and data
-README; files referenced by the README but not present in the supplied package
-remain unavailable until the organizers provide them.
+Gemini UI has been removed. Adapter code remains in the repository, but the
+Gemini award path is not currently presentation-ready.

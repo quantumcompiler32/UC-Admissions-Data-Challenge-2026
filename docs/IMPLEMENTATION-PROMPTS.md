@@ -1,5 +1,9 @@
 # Team Implementation Prompts
 
+> **Archived:** these ticket prompts implement the superseded residual/Gemini
+> plan. ADR-0003 and the current `CONTEXT.md` govern the dashboard. Do not run
+> these prompts without explicitly reopening that plan.
+
 This file contains the copy-paste prompts for implementing the seven Phase 2
 tickets. The repository and GitHub Issues are the shared source of truth. If a
 prompt conflicts with a later issue comment or live organizer instruction,

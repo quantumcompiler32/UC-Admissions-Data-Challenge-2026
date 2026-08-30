@@ -7,9 +7,9 @@ contract rather than a guarantee of eligibility.
 
 | Category | Required evidence | Owner | Current status |
 | --- | --- | --- | --- |
-| Best Use of the Google Gemini API | A user-facing Gemini capability with a documented API call, source-grounded context, demo path, and fallback | Ranveer, with Rathin documenting the demo | Planned: “Explain this view”; Profile Context Explorer as the third vertical slice |
+| Best Use of the Google Gemini API | A user-facing Gemini capability with a documented API call, source-grounded context, demo path, and fallback | Ranveer, with Rathin documenting the demo | Inactive: Gemini UI was removed; do not submit this category unless a tested user-facing capability is restored |
 | UC Question Sprint | Completed ten numeric auto-graded answers plus the answer ledger, formulas, filters, and verification notes | Ranveer | Notebook and rerun ledger preserved; organizer auto-grader confirmation still required |
-| UC Dashboard Construction | Streamlit app answering the selected question, with visible methodology, reproducible metrics, and presentation-ready startup | Moksh | Grill complete; ready for spec and implementation |
+| UC Dashboard Construction | Streamlit app answering the selected question, with visible methodology, reproducible metrics, and presentation-ready startup | Moksh | Implemented locally around ethnicity outcomes; human responsive and deployed-URL checks remain |
 
 ## Dashboard rubric checklist
 
@@ -25,19 +25,17 @@ Use the organizer deck's visible 1–5 rubric as the final review checklist:
 
 ## Shared-project strategy
 
-The Dashboard and Gemini entries may use the same Streamlit application. The
-dashboard remains authoritative for calculations; Gemini explains a selected,
-already-computed view. The Question Sprint evidence remains separately auditable
-so a dashboard feature cannot be mistaken for the completed sprint submission.
+The Question Sprint and dashboard remain separately auditable. No Gemini entry
+should be claimed while the app has no user-facing Gemini capability.
 
 ## Eligibility checklist
 
 Before submission, confirm:
 
-- the submission form has all three categories selected;
+- only categories with complete evidence are selected;
 - the sprint answer ledger is present or otherwise accessible to the team;
 - the Streamlit app starts from a clean checkout with the documented command;
-- the Gemini feature visibly uses the API and has a working fallback;
+- if Gemini is reactivated, it visibly uses the API and has a tested fallback;
 - no API key, secret, or private credential is committed;
 - the README maps each category to its evidence and demo path;
 - the team has tested the actual submission flow, not only local unit tests.

@@ -1,21 +1,24 @@
-# Judge demo path
+# Judge Demo Path
 
-1. Start with the question, represented population, 2017–2025 window, metric,
-   and the explicit 2022 baseline-unavailable break.
-2. Show the default 306 persistent combinations and the 204 positive / 102
-   negative split.
-3. Change campus, year, direction, and school controls. Explain that the
-   persistence rule remains fixed while visible scope changes.
-4. Select a result and point out ATP code, denominators, actual rate, provided
-   baseline, residual, direction consistency, evidence label, and year detail.
-5. Expand methods and separate Universitywide context; mention COVID and the
-   post-2021 test-policy era as limitations, not causal explanations.
-6. Click “Explain this view.” Without `GEMINI_API_KEY`, demonstrate the
-   deterministic offline fallback and keep the source snapshot visible.
-7. If time allows, open Profile Context Explorer. Show the exact redacted
-   payload, explain the explicit confirmation boundary, and use a qualitative
-   evidence-connection request. Never request odds, guarantees, or personal
-   worth.
+Target length: 2–3 minutes.
 
-The app does not package or claim the separate Question Sprint lane until
-Veer’s artifacts are linked, as required by the submission matrix.
+1. Read the question from the first screen and identify freshmen, 2017–2025,
+   and the three metrics.
+2. Point to the five 2025 Systemwide totals: applicants, admits, admission rate,
+   enrollees, and yield.
+3. Use the Overview finding cards to state one change in application share, one
+   in admission rate, and one in yield.
+4. Show the application-composition area chart and explain that International
+   and Unknown are source categories, not racial identities.
+5. Open Trends and demonstrate that the metric, campus, entrant level, and
+   reported groups are interactive.
+6. Open Campus comparison and show one group across the nine campuses. State
+   that Systemwide is not an average campus.
+7. Open GPA & major context. Switch to Berkeley transfer major, select one
+   named major, show the admitted/enrolled GPA ranges, and demonstrate the GPA
+   range comparison. State that it is context, not a probability.
+8. End in Methods with the count-derived formulas and the descriptive,
+   non-causal boundary.
+
+Do not spend judge time on the Historical explorer unless asked. It is a useful
+secondary tool, not the central story.

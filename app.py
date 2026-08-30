@@ -1,290 +1,203 @@
-"""Judge-facing Streamlit app for the UC Persistent Gap Observatory."""
+"""Judge-facing Streamlit app for the UC admissions ethnicity question."""
 
-import hashlib
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
-from analysis import (
-    RESIDUAL_YEARS,
-    calculate_persistent_gaps,
-    campus_year_context,
-    filter_gaps,
-    gap_detail,
-    load_dashboard_data,
-    snapshot_for_gap,
-    universitywide_context,
+from benchmark import discipline_benchmark, load_source, transfer_major_benchmark
+from benchmark_ui import render_benchmark_result, render_historical_benchmark
+from ethnicity_analysis import (
+    METRIC_LABELS, aggregate_scope, campus_matrix, change_findings,
+    filter_metrics, load_ethnicity_data, prepare_ethnicity_metrics,
 )
-from gemini import client_from_environment, explain_view
-from profile import build_redacted_payload, clear_profile_payload, explain_profile
 
-
-DATA_PATH = Path(__file__).parent / "Data" / "dashboard_data.csv"
+ROOT = Path(__file__).parent
+DATA_DIR = ROOT / "Data"
+ETHNICITY_PATH = DATA_DIR / "uc_admissions_summary_by_ethnicity.csv"
+GROUP_ORDER = ["African American", "American Indian", "Asian", "Hispanic/Latino(a)", "International", "Pacific Islander", "Unknown", "White"]
 
 
 @st.cache_data
-def load_results():
-    data = load_dashboard_data(DATA_PATH)
-    return data, calculate_persistent_gaps(data)
+def load_ethnicity_metrics() -> pd.DataFrame:
+    return prepare_ethnicity_metrics(load_ethnicity_data(ETHNICITY_PATH))
 
 
-def _school_label(row):
-    return f"{row['high_school'] or 'Unknown school'} · {row['city'] or 'Unknown city'} — {row['campus']} [{row['atp_code']}]"
+@st.cache_data
+def load_benchmark_source(benchmark_type: str) -> pd.DataFrame:
+    return load_source(DATA_DIR, benchmark_type)
 
 
-def _reset_filters():
-    st.session_state.update({
-        "gap_campus": "All campuses",
-        "gap_year": "All residual years",
-        "gap_direction": "Both",
-        "global_school_query": "",
-    })
+def format_count(value):
+    return "Unavailable" if value is None or pd.isna(value) else f"{value:,.0f}"
 
 
-def _rank_label(row):
-    return f"{row['high_school'] or 'Unknown school'} · {row['city'] or 'Unknown city'} — {row['campus']}"
+def format_rate(value):
+    return "Unavailable" if value is None or pd.isna(value) else f"{value:.1%}"
 
 
-st.set_page_config(
-    page_title="UC Persistent Gap Observatory",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-st.markdown(
-    """
-    <style>
-        .block-container { max-width: 1280px; padding-top: 2.4rem; padding-bottom: 3rem; }
-        h1 { letter-spacing: -0.035em; }
-        [data-testid="stMetricValue"] { font-variant-numeric: tabular-nums; }
-        [data-testid="stMetricLabel"] { font-size: 0.84rem; }
-        [data-testid="stDataFrame"] { border: 1px solid rgba(49, 51, 63, 0.18); border-radius: 0.35rem; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+def change_sentence(finding: dict) -> str:
+    decrease = finding["decrease_pp"]
+    second = (
+        f"{finding['decrease_group']} decreased most ({decrease:+.2f} pp)."
+        if decrease < 0 else
+        f"{finding['decrease_group']} increased least ({decrease:+.2f} pp)."
+    )
+    return f"{finding['increase_group']} increased most ({finding['increase_pp']:+.2f} pp); {second}"
 
-data, gaps = load_results()
-st.title("Where do admission rates persistently differ from the provided baseline?")
-st.caption("California public high-school site × UC campus pairs · 2017–2025 · Fall 2022 baseline unavailable")
-st.markdown(
-    "**Question.** Which represented California public-high-school and UC-campus pairs "
-    "consistently had actual admission rates above or below the provided expected rate?"
-)
-st.caption(
-    "Rates are pooled from admits and applicants. This is descriptive, school-level evidence—not an "
-    "individual admission prediction or a causal claim."
-)
+
+st.set_page_config(page_title="UC Admissions: Representation, Admission & Enrollment", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
+st.markdown("""
+<style>
+:root { --ink:#10233f; --muted:#5d6d82; --blue:#0759a8; --blue-soft:#eaf3ff; --yellow:#ffc928; --yellow-soft:#fff8d8; --line:#d9e4f1; }
+.stApp { background:#f7faff; color:var(--ink); }
+.block-container { max-width:1400px; padding:1.4rem 2rem 3rem; }
+h1,h2,h3 { color:var(--ink); letter-spacing:-.035em; } h1 { font-size:clamp(2rem,4vw,3.35rem); line-height:1.04; margin-bottom:.4rem; }
+p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
+[data-testid="stMetric"] { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem; box-shadow:0 5px 18px rgba(16,35,63,.05); }
+[data-testid="stMetricValue"] { color:var(--blue); font-variant-numeric:tabular-nums; }
+[data-testid="stTabs"] [role="tablist"] { gap:.35rem; border-bottom:1px solid var(--line); }
+[data-testid="stTabs"] button[role="tab"] { color:var(--muted); font-weight:700; padding:.8rem .9rem; }
+[data-testid="stTabs"] button[aria-selected="true"] { color:var(--blue); border-bottom:4px solid var(--yellow); }
+[data-testid="stDataFrame"] { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.hero { background:linear-gradient(115deg,#fff 0%,#edf6ff 100%); border:1px solid #c8ddf5; border-left:8px solid var(--yellow); border-radius:18px; padding:1.25rem 1.45rem; margin:.5rem 0 1.15rem; }
+.eyebrow { color:var(--blue); font-size:.76rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+.question { color:var(--ink); font-size:1.08rem; line-height:1.55; }
+.pill { display:inline-block; background:var(--yellow-soft); color:#735900; border:1px solid #f3d66c; border-radius:999px; padding:.23rem .62rem; font-size:.78rem; font-weight:700; margin:.25rem .2rem 0 0; }
+.finding-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; min-height:112px; }
+.finding-card strong { color:var(--blue); }
+@media (max-width:640px) { .block-container { padding:1rem .75rem 2rem; } .hero { padding:1rem; } }
+</style>
+""", unsafe_allow_html=True)
+
+metrics = load_ethnicity_metrics()
+years = sorted(metrics["fall_term"].dropna().astype(int).unique())
+campuses = ["Systemwide"] + sorted(c for c in metrics["campus"].unique() if c != "Systemwide")
 
 with st.sidebar:
-    st.header("Filter the evidence")
-    st.caption("These controls narrow the visible persistent pairs; the qualification rule stays fixed.")
-    campus = st.selectbox(
-        "UC campus",
-        ["All campuses"] + sorted(gaps["campus"].unique().tolist()),
-        key="gap_campus",
-    )
-    year_options = ["All residual years"] + list(RESIDUAL_YEARS)
-    selected_year = st.selectbox("Residual year present", year_options, key="gap_year")
-    year = None if selected_year == "All residual years" else int(selected_year)
-    direction = st.radio(
-        "Gap direction",
-        ["Both", "Positive", "Negative"],
-        format_func=lambda value: {
-            "Both": "Both directions",
-            "Positive": "Above provided baseline (+)",
-            "Negative": "Below provided baseline (−)",
-        }[value],
-        key="gap_direction",
-    )
-    school_query = st.text_input(
-        "School or city (filters all sections)",
-        placeholder="Optional search",
-        key="global_school_query",
-    )
-    st.button("Reset filters", on_click=_reset_filters, use_container_width=True)
+    st.markdown("### Explore the evidence")
+    pathway_label = st.radio("Applicant pathway", ["Freshman", "Transfer"], horizontal=True, key="dashboard_pathway")
+    entrant_level = pathway_label.lower()
+    if entrant_level == "freshman":
+        st.caption("Freshmen are the primary dashboard population; transfer is a secondary comparison.")
+    campus = st.selectbox("Campus scope", campuses, index=0)
+    selected_year = st.select_slider("Fall year", years, value=max(years))
+    selected_metric = st.selectbox("Metric", list(METRIC_LABELS), format_func=lambda value: METRIC_LABELS[value], index=1)
+    default_groups = ["African American", "Asian", "Hispanic/Latino(a)", "White"]
+    selected_groups = st.multiselect("Reported groups", GROUP_ORDER, default=default_groups)
+    if not selected_groups:
+        selected_groups = GROUP_ORDER
+    st.divider()
+    st.caption("All rates are calculated from counts. Missing values remain unavailable.")
 
-filtered = filter_gaps(gaps, data, campus=campus, year=year, direction=direction, school_query=school_query)
-positive = filtered[filtered["direction"] == "positive"].nlargest(10, "pooled_residual").copy()
-negative = filtered[filtered["direction"] == "negative"].nsmallest(10, "pooled_residual").copy()
-ranking = pd.concat([positive, negative], ignore_index=True)
-ranking["school"] = ranking.apply(_rank_label, axis=1)
-ranking["direction_label"] = ranking["direction"].map({"positive": "Above (+)", "negative": "Below (−)"})
-ranking["residual_pp"] = ranking["pooled_residual"] * 100
+st.markdown('<div class="eyebrow">UC Admissions Data Challenge 2026</div>', unsafe_allow_html=True)
+st.title("Who applies, who is admitted, and who enrolls?")
+st.markdown("""
+<div class="hero">
+  <div class="question"><strong>Question.</strong> Among UC freshman applicants from 2017–2025, how did application share, admission rate, and enrollment yield change across reported race and ethnicity groups, and how did those patterns differ across campuses and years?</div>
+  <div><span class="pill">2017–2025</span><span class="pill">Freshmen primary</span><span class="pill">Count-derived rates</span><span class="pill">Descriptive, not causal</span></div>
+</div>
+""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Persistent pairs in view", len(filtered))
-col2.metric("Above provided baseline", int((filtered["direction"] == "positive").sum()))
-col3.metric("Below provided baseline", int((filtered["direction"] == "negative").sum()))
-st.caption(
-    "Full-scope finding: 306 persistent pairs—204 above and 102 below the provided baseline. "
-    "A persistent pair has at least three residual years and the same direction in at least 80% of them."
-)
+active = filter_metrics(metrics, entrant_level=entrant_level, campus=campus, years=[selected_year])
+totals = aggregate_scope(active)
+summary_cards = st.columns(5)
+summary_cards[0].metric("Applicants", format_count(totals["applicants"]))
+summary_cards[1].metric("Admits", format_count(totals["admits"]))
+summary_cards[2].metric("Admission rate", format_rate(totals["admission_rate"]))
+summary_cards[3].metric("Enrollees", format_count(totals["enrollees"]))
+summary_cards[4].metric("Enrollment yield", format_rate(totals["yield_rate"]))
+st.caption(f"Active scope: {pathway_label} · {campus} · fall {selected_year}. Systemwide is a supplied aggregate and is never reconstructed by adding campuses.")
 
-st.subheader("Persistent gaps, ranked around zero")
-st.caption(
-    "Each bar is the pooled actual admission rate minus the applicant-weighted provided expected rate, "
-    "in percentage points."
-)
-if ranking.empty:
-    st.warning("No persistent combinations match these controls.")
-else:
-    positive_col, negative_col = st.columns(2)
-    with positive_col:
-        st.markdown("**Above provided baseline (+)**")
-        if positive.empty:
-            st.caption("No matching positive gaps.")
-        else:
-            st.bar_chart(positive.set_index(positive.apply(_rank_label, axis=1))["pooled_residual"] * 100, horizontal=True, color="#176B5A")
-    with negative_col:
-        st.markdown("**Below provided baseline (−)**")
-        if negative.empty:
-            st.caption("No matching negative gaps.")
-        else:
-            st.bar_chart(negative.set_index(negative.apply(_rank_label, axis=1))["pooled_residual"] * 100, horizontal=True, color="#B23A48")
-    st.dataframe(
-        ranking[["school", "campus", "direction_label", "residual_pp", "pooled_applicants", "years_observed", "limited_evidence"]].rename(
-            columns={
-                "school": "High-school site · city · campus",
-                "direction_label": "Direction",
-                "residual_pp": "Residual (percentage points)",
-                "pooled_applicants": "Pooled applicants",
-                "years_observed": "Years observed",
-                "limited_evidence": "Limited evidence",
-            }
-        ),
-        hide_index=True,
-        width="stretch",
-    )
+overview_tab, trends_tab, campus_tab, gpa_tab, benchmark_tab, methods_tab = st.tabs(["Overview", "Trends", "Campus comparison", "GPA & major context", "Historical explorer", "Methods"])
 
-st.subheader("How the visible pairs vary by campus and year")
-st.caption("Applicant-weighted context for the persistent pairs shown above. It explains the ranking; it does not redefine persistence.")
-context = campus_year_context(
-    data,
-    school_query=school_query,
-    persistent_keys=filtered[["atp_code", "campus"]],
-).copy()
-context["residual_pp"] = context["residual"] * 100
-context["campus_year"] = context["campus"] + " · " + context["fall_term"].astype(int).astype(str)
-if context.empty:
-    st.info("No residual-ready records match the visible persistent-pair scope.")
-else:
-    st.bar_chart(context.set_index("campus_year")["residual_pp"], horizontal=True, height=420)
-    st.dataframe(
-        context[["fall_term", "campus", "applicants", "admits", "actual_rate", "expected_rate", "residual_pp"]].rename(
-            columns={
-                "fall_term": "Fall year",
-                "campus": "Campus",
-                "applicants": "Applicants",
-                "admits": "Admits",
-                "actual_rate": "Actual rate",
-                "expected_rate": "Provided expected rate",
-                "residual_pp": "Residual (percentage points)",
-            }
-        ),
-        hide_index=True,
-        width="stretch",
-    )
+with overview_tab:
+    st.subheader("The systemwide story")
+    findings = change_findings(metrics)
+    finding_columns = st.columns(3)
+    for column, metric_name in zip(finding_columns, ("application_share", "admission_rate", "yield_rate")):
+        column.markdown(f'<div class="finding-card"><strong>{METRIC_LABELS[metric_name]}</strong><br>{change_sentence(findings[metric_name])}</div>', unsafe_allow_html=True)
+    st.caption("Changes are percentage-point differences between supplied Systemwide freshman records for 2017 and 2025. They describe outcomes; they do not explain causes.")
 
-st.subheader("Inspect one school-campus pair")
-snapshot = None
-if not filtered.empty:
-    selection_options = filtered.apply(_school_label, axis=1).tolist()
-    selection_key = "detail_selection_" + hashlib.sha1(school_query.encode("utf-8")).hexdigest()
-    selected_label = st.selectbox("Select evidence (ATP code disambiguates duplicate school names)", selection_options, key=selection_key)
-    selected_row = filtered.iloc[selection_options.index(selected_label)]
-    detail = gap_detail(data, selected_row["atp_code"], selected_row["campus"])
-    snapshot = snapshot_for_gap(data, gaps, selected_row["atp_code"], selected_row["campus"])
-    evidence_label = "Limited evidence" if selected_row["limited_evidence"] else "Evidence threshold met"
-    st.write(f"**{selected_label}** · **{evidence_label}**")
-    metrics = st.columns(6)
-    metrics[0].metric("Applicants", f"{selected_row['pooled_applicants']:,.0f}")
-    metrics[1].metric("Admits", f"{selected_row['pooled_admits']:,.0f}")
-    metrics[2].metric("Actual rate", f"{selected_row['actual_rate']:.1%}")
-    metrics[3].metric("Provided baseline", f"{selected_row['expected_rate']:.1%}")
-    metrics[4].metric("Residual", f"{selected_row['pooled_residual'] * 100:+.2f} pp")
-    metrics[5].metric("Direction consistency", f"{selected_row['direction_consistency']:.0%}")
-    st.caption(f"{selected_row['years_observed']} residual years observed. ATP code {selected_row['atp_code']} is the stable site identity. 2022 is marked as baseline unavailable.")
-    chart_data = detail.set_index("fall_term")[["actual_rate", "expected_rate"]].rename(
-        columns={"actual_rate": "Actual admission rate", "expected_rate": "Provided expected rate"}
-    )
-    st.line_chart(chart_data)
-    st.dataframe(
-        detail.rename(
-            columns={
-                "fall_term": "Fall year",
-                "actual_rate": "Actual rate",
-                "expected_rate": "Provided expected rate",
-                "residual": "Residual",
-                "baseline_available": "Baseline available",
-                "coverage_status": "Coverage",
-            }
-        ),
-        hide_index=True,
-        width="stretch",
-    )
-    with st.expander("Structured source snapshot for this view"):
-        st.caption("This is the only evidence payload intended for the optional explanation feature; the full CSV is never sent.")
-        st.json(snapshot)
-    if st.button("Explain this view", type="primary", help="Use only the computed snapshot, definitions, and limitations."):
-        st.session_state["view_explanation"] = explain_view(snapshot, client_from_environment())
-    if "view_explanation" in st.session_state:
-        result = st.session_state["view_explanation"]
-        st.markdown(f"**{result['source']}**")
-        st.write(result["text"])
-        st.caption(f"Status: {result['reason']}. Source metrics remain above and are authoritative.")
-else:
-    st.info("Adjust the filters to inspect a persistent school-campus pair.")
+    highlighted = sorted({value[f"{direction}_group"] for value in findings.values() for direction in ("increase", "decrease")})
+    with st.expander("Headline denominator check", expanded=False):
+        denominator_rows = filter_metrics(metrics, entrant_level="freshman", campus="Systemwide", years=[2017, 2025], ethnicities=highlighted)
+        st.dataframe(
+            denominator_rows[["fall_term", "ethnicity", "applicants", "admits", "enrollees"]].rename(columns={"fall_term":"Fall year","ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees"}),
+            hide_index=True,
+            width="stretch",
+        )
+        st.caption("Largest percentage-point changes should be interpreted with their starting and ending counts, especially for smaller reported groups.")
 
-with st.expander("Methods, coverage, and limitations", expanded=False):
-    st.markdown(
-        """
-        **Persistence.** A school-site/campus pair needs at least three residual years, at least 80% of yearly residuals on one side of zero, and agreement between that dominant direction and the pooled residual sign. Rates are calculated from pooled admits and applicants; percentages are never averaged.
+    systemwide = filter_metrics(metrics, entrant_level="freshman", campus="Systemwide")
+    composition = systemwide.pivot(index="fall_term", columns="ethnicity", values="application_share")[GROUP_ORDER]
+    st.markdown("#### How the application pool changed")
+    st.area_chart(composition, height=390)
+    st.caption("Each year sums to 100% across the eight reported dataset categories. International and Unknown are displayed categories, not racial identities.")
 
-        **Evidence boundaries.** `expected_admit_rate` is a provided baseline whose construction is undocumented. It is not causal truth and the results are not a fairness verdict. Blank or redacted values stay unknown and are excluded when a required residual field is unavailable. `atp_code` is the stable school-site identity; displayed school and city names can repeat.
+    st.markdown(f"#### {METRIC_LABELS[selected_metric]} by reported group in {selected_year}")
+    year_rows = active.set_index("ethnicity").reindex(GROUP_ORDER).dropna(subset=[selected_metric])
+    st.bar_chart(year_rows[[selected_metric]].rename(columns={selected_metric: METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
+    display = active[["ethnicity", "applicants", "admits", "enrollees", "application_share", "admission_rate", "yield_rate"]].sort_values(selected_metric, ascending=False)
+    st.dataframe(display.rename(columns={"ethnicity":"Reported group","applicants":"Applicants","admits":"Admits","enrollees":"Enrollees","application_share":"Application share","admission_rate":"Admission rate","yield_rate":"Enrollment yield"}), hide_index=True, width="stretch", column_config={"Application share":st.column_config.NumberColumn(format="%.1f%%"),"Admission rate":st.column_config.NumberColumn(format="%.1f%%"),"Enrollment yield":st.column_config.NumberColumn(format="%.1f%%")})
 
-        **Coverage.** Residual-ready years are 2017–2021 and 2023–2025. Fall 2020 may reflect COVID disruption. Fall 2021 onward is a different test-policy era after UC stopped considering SAT/ACT scores. These are context caveats, not causal explanations. Limited evidence means fewer than five residual years or fewer than 100 pooled applicants; those results remain visible.
+with trends_tab:
+    st.subheader(f"{METRIC_LABELS[selected_metric]} over time")
+    st.caption(f"{pathway_label} · {campus} · selected groups. Use the sidebar to change the metric or population.")
+    trend_rows = filter_metrics(metrics, entrant_level=entrant_level, campus=campus, ethnicities=selected_groups)
+    trend = trend_rows.pivot(index="fall_term", columns="ethnicity", values=selected_metric)
+    st.line_chart(trend, height=470)
+    st.dataframe(trend.reset_index().rename(columns={"fall_term":"Fall year"}), hide_index=True, width="stretch", column_config={group:st.column_config.NumberColumn(format="%.1f%%") for group in selected_groups})
 
-        **Boundary.** These aggregated records cannot determine an individual student's chance of admission. The dashboard does not calculate admission odds or causal explanations.
-        """
-    )
+with campus_tab:
+    st.subheader(f"How campuses differed in {selected_year}")
+    campus_group = st.selectbox("Reported group for campus ranking", selected_groups, key="campus_group")
+    campus_rows = filter_metrics(metrics, entrant_level=entrant_level, years=[selected_year], ethnicities=[campus_group])
+    campus_rows = campus_rows[campus_rows["campus"] != "Systemwide"].sort_values(selected_metric, ascending=False)
+    st.bar_chart(campus_rows.set_index("campus")[[selected_metric]].rename(columns={selected_metric:METRIC_LABELS[selected_metric]}), horizontal=True, height=420, color="#0759A8")
+    st.caption("Campus rows count applications to each campus. They are not additive student totals, and Systemwide is not an average campus.")
+    st.markdown("#### All reported groups by campus")
+    matrix = campus_matrix(metrics, entrant_level=entrant_level, year=selected_year, metric=selected_metric)
+    st.dataframe(matrix, width="stretch", column_config={column:st.column_config.NumberColumn(format="%.1f%%") for column in matrix.columns})
 
-with st.expander("Separate Universitywide context", expanded=False):
-    st.caption("Universitywide counts students admitted to at least one UC; it is not the sum of campus rows and is never included in the ranking.")
-    uw = universitywide_context(data)
-    st.dataframe(
-        uw.rename(columns={"fall_term": "Fall year", "applicants": "Applicants", "admits": "Admits", "actual_rate": "Actual admission rate"}),
-        hide_index=True,
-        width="stretch",
-    )
-
-with st.expander("Optional profile context — not a prediction tool", expanded=False):
-    st.caption("Temporary, qualitative context only. Nothing is written to disk or used to calculate admission odds, probability, guarantees, or personal rankings.")
-    if snapshot is None:
-        st.info("Select a persistent school-campus result first.")
+with gpa_tab:
+    st.subheader("GPA and field-of-study context")
+    st.info("This is a separate fall 2025 aggregate context view. The supplied files do not support joining GPA, major, and ethnicity into an individual prediction.")
+    gpa_pathway = st.radio("Context pathway", ["First-year discipline", "Berkeley transfer major"], horizontal=True, key="gpa_pathway")
+    if gpa_pathway == "First-year discipline":
+        source = load_benchmark_source("Fall 2025 discipline")
+        cols = st.columns(2)
+        gpa_campus = cols[0].selectbox("Campus", sorted(source["campus"].unique()), key="gpa_campus")
+        compatible = source[source["campus"] == gpa_campus]
+        discipline = cols[1].selectbox("Broad discipline", sorted(compatible["broad_discipline"].unique()), key="gpa_discipline")
+        gpa_result = discipline_benchmark(source, gpa_campus, discipline)
     else:
-        with st.form("profile_form", clear_on_submit=False):
-            interests = st.text_input("Interests", max_chars=500, key="profile_interests")
-            coursework = st.text_input("Coursework", max_chars=500, key="profile_coursework")
-            activities = st.text_area("Activities", max_chars=1000, key="profile_activities")
-            resume_text = st.text_area("Optional pasted resume text", max_chars=5000, key="profile_resume_text")
-            profile_request = st.text_input("What qualitative connection would you like explained?", max_chars=500, key="profile_request")
-            preview = build_redacted_payload(interests, coursework, activities, resume_text)
-            st.markdown("**Exact redacted payload preview**")
-            st.json(preview)
-            confirm = st.checkbox("I explicitly confirm that this redacted payload may be sent to Gemini for a qualitative explanation.")
-            submitted = st.form_submit_button("Explain profile context")
-        if submitted:
-            result = explain_profile(preview, snapshot, profile_request, client_from_environment(), confirm)
-            if result["reason"] in ("user confirmation required", "prohibited request"):
-                st.warning(result["text"])
-            else:
-                st.markdown(f"**{result['source']}**")
-                st.write(result["text"])
-                st.caption(f"Status: {result['reason']}. Profile data is not persisted by this app.")
-    if st.button("Clear profile fields"):
-        for key in ("profile_interests", "profile_coursework", "profile_activities", "profile_resume_text", "profile_request"):
-            st.session_state.pop(key, None)
-        clear_profile_payload()
-        st.info("Profile fields cleared for this session. No profile data was stored by the app.")
+        source = load_benchmark_source("Fall 2025 Berkeley major")
+        cols = st.columns(2)
+        discipline = cols[0].selectbox("Broad discipline", sorted(source["broad_discipline"].unique()), key="gpa_major_discipline")
+        compatible = source[source["broad_discipline"] == discipline]
+        major = cols[1].selectbox("Named major", sorted(compatible["major"].unique()), key="gpa_major")
+        gpa_result = transfer_major_benchmark(source, discipline, major)
+    render_benchmark_result(gpa_result)
+
+with benchmark_tab:
+    render_historical_benchmark(DATA_DIR)
+
+with methods_tab:
+    st.subheader("Methods, definitions, and limitations")
+    st.markdown("""
+**Application share** = applicants in a reported group ÷ applicants across all eight reported categories for the same entrant level, campus, and year.
+
+**Admission rate** = admits ÷ applicants for the same reported group, entrant level, campus, and year.
+
+**Enrollment yield** = enrollees ÷ admits for the same reported group, entrant level, campus, and year.
+
+**Population.** The primary story uses the supplied UC freshman ethnicity summary from 2017–2025. Transfer records are available as a secondary comparison. `Systemwide` is a supplied aggregate and is never reconstructed from campus rows.
+
+**Interpretation.** These are aggregated descriptive outcomes. They do not establish that race or ethnicity caused an admission result, do not control for preparation, major, residency, application choices, or other factors, and cannot estimate an individual's admission probability.
+
+**Categories.** The source reports African American, American Indian, Asian, Hispanic/Latino(a), International, Pacific Islander, Unknown, and White. International and Unknown are retained exactly as reported but are not racial identities.
+
+**Missingness.** Missing admit or enrollee counts remain unavailable. Rates are never created by replacing missing counts with zero. Every chart has a table alternative and all authoritative numbers are calculated deterministically in Python.
+""")
+    st.caption("Primary source: Data/uc_admissions_summary_by_ethnicity.csv. GPA/discipline context: Data/uc_freshman_admission_by_discipline.csv. Transfer-major context: Data/uc_transfer_admission_by_major.csv.")

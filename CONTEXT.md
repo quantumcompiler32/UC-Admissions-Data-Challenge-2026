@@ -2,184 +2,87 @@
 
 ## Product purpose
 
-This dashboard is a competition presentation for judges and generalist data
-reviewers. It will answer one descriptive analytical question clearly and make
-the denominator, comparison baseline, coverage, and limitations visible.
+This Streamlit dashboard is a judge-facing, descriptive analysis of how UC
+application share, admission rate, and enrollment yield changed across reported
+race and ethnicity groups. Counts, denominators, categories, and limitations
+remain visible.
 
-## Event tracks
+## Accepted analytical question
 
-- **Question Sprint**: ten UC Admissions data questions with numeric,
-  auto-graded answers. Phase 1 is complete; its answer ledger and verified
-  metrics are reusable evidence, not active work.
-- **Dashboard Construction**: the current Phase 2 workstream: a Streamlit
-  dashboard that answers one precise, important UC admissions question.
-- **Gemini API track**: an intended submission category using a focused
-  AI-powered capability. It may share the Streamlit app, but must not become a
-  required network or API-key dependency for the dashboard.
+> Among UC freshman applicants from 2017–2025, how did application share,
+> admission rate, and enrollment yield change across reported race and ethnicity
+> groups, and how did those patterns differ across campuses and years?
 
-The planned Gemini capabilities are a source-grounded “Explain this view”
-companion and a secondary Profile Context Explorer. The Profile Context Explorer
-may summarize user-provided profile or resume text and relate declared interests
-to school-level dashboard evidence, but it does not estimate individual
-admission odds or probabilities.
+The primary population is freshman applicants in
+`Data/uc_admissions_summary_by_ethnicity.csv`. Transfer records are a secondary
+comparison. The source categories are African American, American Indian, Asian,
+Hispanic/Latino(a), International, Pacific Islander, Unknown, and White.
+International and Unknown are retained dataset categories, not racial
+identities.
 
-## Organizer deck constraints
+## Metric contract
 
-The organizer slide deck states that the Question Sprint and Dashboard each
-represent 50% of the score. For the dashboard, the question must specify a time
-window, population of interest, and metric; the answer should be worked out in
-Google Colab with Python/Pandas before the Streamlit `app.py` is built; the app
-should be deployed early; and the team submits a GitHub repository link with a
-methodology README and presents the dashboard. The visible rubric covers the
-question, finding, rigor, dashboard accuracy/reliability, and presentation.
+- **Application share:** group applicants divided by applicants across all eight
+  reported categories for the same entrant level, campus, and year.
+- **Admission rate:** group admits divided by group applicants.
+- **Enrollment yield:** group enrollees divided by group admits.
+- Rates are calculated from counts. Missing counts remain unavailable.
+- `Systemwide` is a supplied aggregate. Campus rows are not summed to recreate
+  it, and Systemwide is not treated as an average campus.
 
-The deck does not prescribe a Phase 2 question; it directs each team to develop
-its own. The team-selected question is recorded below. Detailed Gemini award
-criteria remain unspecified. See `docs/REFERENCE-DECK.md` for the source-fact
-and decision boundary.
+## Evidence hierarchy
 
-## Analytical question status
+1. Systemwide 2017–2025 changes in application composition, admission rate, and
+   enrollment yield.
+2. Metric trends for selected reported groups.
+3. Campus comparisons for a selected year and group.
+4. Counts and table alternatives beside visual evidence.
+5. Separate fall 2025 GPA and field-of-study context.
+6. Historical benchmark explorer for compatible aggregate selections.
 
-The team selected this dashboard question through `grill-with-docs`:
+## Verified initial findings
 
-> Among California public-high-school applicants represented in the data, which
-> high-school-site and UC-campus combinations showed persistent,
-> applicant-weighted actual-minus-provided-expected admission-rate gaps during
-> 2017–2025, excluding 2022 when the baseline is unavailable, and how did those
-> gaps vary by campus and year?
+Using supplied Systemwide freshman records from 2017 to 2025:
 
-The comparison unit is one school site × one UC campus × one fall year. The main
-residual window is 2017–2025, with 2022 shown as a coverage gap. The population
-is the represented California public-high-school applicant records; campus rows
-are primary, while `Universitywide` is separate context. The metric is the
-applicant-weighted actual admission rate minus the provided expected admission
-rate, expressed in percentage points. Revisit this contract only if live
-organizer instructions conflict with it. The question is descriptive and does
-not claim that school characteristics, campus practices, or policy changes cause
-the observed deviations.
+- Asian application share increased the most, by 3.42 percentage points; White
+  application share decreased the most, by 4.69 points.
+- Pacific Islander admission rate increased the most, by 22.93 percentage
+  points; International admission rate increased the least, by 1.88 points.
+- American Indian enrollment yield increased by 4.12 percentage points, while
+  Hispanic/Latino(a) yield decreased the most, by 13.55 points.
+- In 2025, the eight Systemwide freshman categories contained 205,389
+  applicants, 148,676 admits, and 52,609 enrollees: a 72.4% aggregate admission
+  rate and 35.4% aggregate yield.
 
-The primary pattern is persistence across years, not a single-year extreme.
-For this analysis, persistence means at least three residual years with at least
-80% of observed residuals on the same side of zero, and the pooled residual sign
-must agree with that dominant yearly direction. Rankings use pooled
-applicant-weighted residuals and are split into positive and negative patterns.
-No result is excluded solely for low applicant volume; applicant volume and
-coverage are shown as evidence strength and limitation context.
+These are descriptive changes, not causal or fairness conclusions. Counts and
+category definitions must remain visible when interpreting changes.
 
-In plain language, a persistent school-campus gap is a repeated difference for
-the same high-school site and UC campus between its actual admission rate and
-the provided expected rate. A one-year spike alone is not the primary story.
+## GPA and major boundary
 
-The evidence hierarchy puts persistent school-campus gaps first, with campus
-and year rollups as context.
+GPA and field-of-study context is separate from ethnicity because the supplied
+files have no valid join key across those grains.
 
-## Working design defaults
-
-- Information architecture: narrative-first, moving from scope and controls to
-  primary evidence, context, detail, and methods.
-- Visual direction: Residual Observatory, an editorial evidence-led surface
-  organized around the zero line and actual-versus-expected comparisons.
-- Supporting detail: Admissions Ledger principles, keeping counts and
-  denominator context adjacent to rates.
-
-- First-screen job: make the above- or below-baseline pattern understandable
-  immediately, with the time window, population, and metric visible.
-- Supporting flow: campus/year context followed by clickable school-campus
-  detail; Policy Timeline remains context rather than the primary story.
-- Controls: campus, year, positive/negative gap, and school filters are
-  exploratory; the persistence rule remains fixed and visible.
-- Gemini flow: the dashboard finding comes first, “Explain this view” is the
-  primary Gemini action, and Profile Context Explorer is a secondary,
-  time-permitting demo.
-- Profile input: a structured form plus optional pasted resume text; the user
-  confirms before transmission, contact details are removed, and the data is
-  not stored.
-- Primary chart: a zero-centered diverging horizontal ranking with positive and
-  negative gaps separated clearly and school, campus, residual, applicants,
-  and years visible.
-- Detail evidence: selecting a school-campus combination reveals actual rate,
-  expected rate, residual, applicants, admits, years observed, direction
-  consistency, and a year-by-year trend.
-- Evidence strength: applicant count, years observed, and coverage remain
-  visible. “Limited evidence” means fewer than five residual years or fewer than
-  100 pooled applicants; the result remains visible.
-- Profile data: optional, temporary, and transmitted to Gemini only after the
-  user explicitly confirms. Contact details and unnecessary personal data are
-  excluded, and the profile is not stored in the repository.
-
-## Population and grain
-
-- Population: California public high-school applicants represented in the
-  selected rows.
-- Analysis key: one `atp_code`, one fall year, and one UC campus per row.
-  `atp_code` is the observed school-site identifier used to prevent collisions
-  between schools that share a displayed `high_school` name.
-- The displayed `high_school` label is not a unique identifier: the supplied
-  dashboard file contains 474 duplicate school-name/year/campus keys across
-  distinct school sites.
-- The data contains aggregated school-level records, not individual student
-  records.
-
-## Data-backed coverage
-
-- `dashboard_data.csv` contains 34,311 rows, 296 observed `atp_code` values,
-  and no duplicate `atp_code`/year/campus keys.
-- The supplied expected-rate field is populated on 15,954 rows. A usable
-  residual requires actual rate, expected rate, and count fields and is present
-  on 14,252 rows.
-- Residual-ready years are 2017–2021 and 2023–2025. There is no supplied
-  expected-rate or residual coverage for 2005–2016 or 2022.
-- The residual analysis window is therefore 2017–2025 with the 2022 coverage
-  gap shown explicitly. Longer actual-rate context may use 2005–2025.
-- Aggregate actual and expected rates use applicant weighting: expected admits
-  are calculated as applicants × provided expected rate, then pooled before
-  dividing. Residual is pooled actual rate minus pooled expected rate.
-- A persistent pattern requires at least three residual years, at least 80% of
-  observed residuals on the same side of zero, and agreement between that
-  dominant direction and the pooled residual sign. Applicant volume and coverage
-  remain visible; no small-school exclusion cutoff is applied.
-- School labels are displayed as `high_school + city`; `atp_code` remains the
-  internal identity and is available in detail views.
-- The 2022 residual gap is shown as “baseline unavailable”; it is never
-  interpolated.
-
-## Canonical terms
-
-- **Admission rate**: pooled admits divided by pooled applicants. Rates are
-  calculated from counts; school-level percentages are not averaged.
-- **Expected admission rate**: the provided comparison baseline in
-  `dashboard_data.csv`. Its construction is not documented in the supplied
-  README, so it must be labeled as provided and not presented as causal truth.
-- **Admission-rate residual**: actual admission rate minus expected admission
-  rate, expressed in percentage points where both values are available.
-- **Persistent school-campus gap**: an admission-rate residual observed for the
-  same school site and campus in at least three residual years, with at least
-  80% of observed residuals on the same side of zero and the pooled residual
-  sign agreeing with that dominant direction. Avoid “systematic gap,” which can
-  imply causation or an institutional mechanism not established here.
-- **Limited evidence**: a visible qualification for a persistent school-campus
-  gap with fewer than five residual years or fewer than 100 pooled applicants.
-  It is a warning, not an exclusion rule.
-- **Positive gap**: a positive residual; the observed actual admission rate is
-  above the provided expected rate.
-- **Negative gap**: a negative residual; the observed actual admission rate is
-  below the provided expected rate.
-- **Residual year**: a fall year with enough actual, expected, and count data to
-  calculate an admission-rate residual for the selected school-campus unit. In
-  this dataset those years are 2017–2021 and 2023–2025; 2022 is a coverage gap,
-  not a zero or a reversal.
-- **Universitywide**: a separate UC-wide aggregate representing admission to at
-  least one UC. It is not the sum of the nine campus rows.
-- **Redacted value**: a blank count that may mean hidden or none. It remains
-  unknown and is never silently converted to zero.
-- **Coverage**: whether the required fields are present for the selected row or
-  comparison. Missing coverage is shown as unavailable rather than inferred.
+- `uc_freshman_admission_by_discipline.csv` supports campus, broad discipline,
+  fall 2025 rates, and admitted/enrolled GPA 25th–75th percentile ranges.
+- `uc_transfer_admission_by_major.csv` supports Berkeley transfer named majors,
+  fall 2025 rates, and admitted/enrolled GPA ranges.
+- `dashboard_data.csv` supports count-weighted school-history GPA context.
+- A user may compare a GPA to a displayed historical range. That comparison
+  never changes a rate or estimates an individual probability.
 
 ## Claim boundary
 
-The dashboard presents descriptive patterns and associations. It does not claim
-that school characteristics, policy changes, or residuals cause admission
-outcomes. Fall 2020 is affected by COVID, and fall 2021 onward reflects the
-post-SAT/ACT admissions-policy context. It also does not produce individual
-admission odds from a profile or resume; the supplied data is aggregated rather
-than applicant-level.
+The data is aggregated. The dashboard does not establish that race or ethnicity
+caused an outcome, does not control for preparation, major, residency,
+application choices, or other factors, and does not estimate individual
+admission odds. It never combines school, ethnicity, discipline, and major
+criteria into a personal result.
+
+## Product status
+
+- Question Sprint evidence remains preserved separately.
+- The ethnicity dashboard and Historical Admissions Benchmark are implemented.
+- Gemini UI has been removed. Adapter code and tests remain, but the Gemini
+  award path is not currently presentation-ready.
+- The former persistent residual dashboard is superseded and retained only as
+  archived analysis code, tests, notebook, research notes, and ADR history.

@@ -8,7 +8,7 @@
 - Repository account: `quantumcompiler32`
 - Human team size: three people
 - GitHub collaborator invitations: sent; acceptance is pending
-- Submission target: all three challenge categories
+- Submission target: Dashboard and Question Sprint active; Gemini inactive
 
 The repository account is not assumed to identify a specific human. Team names
 are recorded below; GitHub handles remain unassigned until collaborator
@@ -39,54 +39,26 @@ GitHub Issue or commit message.
 ### Accepted working defaults
 
 - Audience: competition judges and generalist data reviewers.
-- Selected question: among represented California public-high-school applicants,
-  which high-school-site and UC-campus combinations showed persistent,
-  applicant-weighted actual-minus-provided-expected admission-rate gaps during
-  2017–2025, excluding the 2022 baseline gap, and how did those gaps vary by
-  campus and year?
-- Data contract: the population, grain, weighted-rate rule, redaction rule,
-  `Universitywide` treatment, coverage rule, and descriptive claim boundary in
-  `CONTEXT.md`.
-- Information architecture: narrative-first, moving from scope and controls
-  to primary evidence, context, detail, and methods.
-- Visual direction: Residual Observatory—an editorial, evidence-led surface
-  organized around the zero line and actual-versus-expected comparisons.
-- Supporting design principle: Admissions Ledger-style denominator visibility
-  in tables and detail views.
-- Residual scope: 2017–2025 with the 2022 coverage gap visible; 2005–2025 may
-  provide actual-rate context.
-- Residual aggregation: applicant-weighted rollups keyed by `atp_code`, year,
-  and campus, with school-site detail retained.
-- Primary evidence: persistent school-campus deviations; campus/year rollups
-  provide context.
-- Persistence: at least three residual years, at least 80% on one side of zero,
-  and agreement between the pooled residual sign and dominant yearly direction.
-- Limited evidence: fewer than five residual years or fewer than 100 pooled
-  applicants; label rather than exclude.
-- School labels: `high_school + city`, with `atp_code` available for identity
-  and detail.
-- 2022: show an explicit “baseline unavailable” break; do not interpolate.
+- Selected question: how application share, admission rate, and enrollment
+  yield changed across reported race and ethnicity groups for UC freshmen from
+  2017–2025, with campus and year variation.
+- Primary source: `uc_admissions_summary_by_ethnicity.csv`; freshmen primary,
+  transfers secondary.
+- Primary evidence: systemwide composition, rate and yield trends, campus
+  comparisons, counts, and table alternatives.
+- GPA and major context remains separate from ethnicity and never produces an
+  individual probability.
+- The former residual contract is superseded by ADR-0003.
 
 ### Still open
 
-- The construction and provenance of `expected_admit_rate` are not documented
-  in the supplied data README. Until clarified, label it as a provided
-  baseline.
 - GitHub handles and collaborator acceptance remain unverified.
 
-## Visual directions considered
+## Visual direction
 
-1. **Residual Observatory — selected.** Editorial, evidence-led layout
-   organized around a zero line, persistent school-campus residuals, and
-   campus/year context.
-2. **Admissions Ledger — alternative.** Table-first, audit-oriented layout
-   emphasizing counts, denominator context, in-cell bars, and sparklines.
-3. **Policy Timeline — alternative.** Year-led small multiples emphasizing
-   campus trajectories, with school-level residuals as annotations.
-
-The selected direction keeps Admissions Ledger denominator visibility in its
-detail views and uses Policy Timeline context without making policy change the
-primary claim.
+Use an evidence-led pipeline narrative: application composition, admission,
+enrollment, campus variation, then separate GPA/major context. Counts remain
+adjacent to rates and meaning never depends on color alone.
 
 ## Recommended start sequence
 

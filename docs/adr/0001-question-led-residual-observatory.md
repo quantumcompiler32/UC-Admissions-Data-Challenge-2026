@@ -1,6 +1,6 @@
 # ADR-0001: Question-led residual analysis as the dashboard spine
 
-- Status: Accepted
+- Status: Superseded by ADR-0003
 - Date: 2026-08-30
 
 ## Context

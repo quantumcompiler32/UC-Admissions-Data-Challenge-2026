@@ -24,9 +24,8 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 - The team is preparing for Phase 2 implementation. The organizer deck directs
   teams to develop their own question, and this team's question is settled in
   `CONTEXT.md`.
-- The submission target is all three challenge categories; each requires a
-  distinct evidence path even if the dashboard and Gemini feature share one
-  Streamlit application.
+- The dashboard and Question Sprint remain active submission paths. Gemini UI
+  has been removed and that award path is not currently presentation-ready.
 - The organizer deck says the Question Sprint and Dashboard are each 50% of
   the score. The dashboard question must specify a time window, population,
   and metric; the answer should be worked out reproducibly before building
@@ -35,15 +34,12 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   Streamlit, Ranveer leads technical/data work, and Rathin handles bounded
   reproducibility and presentation support.
 - The dashboard audience is competition judges and generalist data reviewers.
-- The selected question asks which represented high-school-site and UC-campus
-  combinations showed persistent applicant-weighted actual-minus-provided-
-  expected admission-rate gaps during 2017–2025, excluding the 2022 baseline
-  gap, and how those gaps varied by campus and year.
-- The accepted planning defaults are the data contract in `CONTEXT.md`, a
-  narrative-first information architecture, and the Residual Observatory
-  visual direction. Revisit them only if live organizer instructions conflict.
-- Keep the Admissions Ledger and Policy Timeline directions documented as
-  alternatives; do not silently replace the accepted direction.
+- The selected question asks how application share, admission rate, and
+  enrollment yield changed across reported race and ethnicity groups for UC
+  freshmen from 2017–2025, and how patterns differed across campuses and years.
+- The accepted contract is in `CONTEXT.md` and ADR-0003. The former residual
+  dashboard is archived and must not be restored as the homepage without a new
+  explicit decision.
 - The grill is complete. Use `docs/GRILL-SUMMARY.md` as the primary input to the
   spec and implementation tickets; do not reopen settled product decisions
   without new evidence or conflicting organizer instructions.
@@ -61,12 +57,10 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
   `Universitywide` as the sum of campus rows.
 - Use the tracked `Data/` package as the shared data source. Do not depend on a
   personal Downloads path or silently substitute a different dataset.
-- Keep completed Phase 1 evidence, Phase 2 Dashboard Construction, and the
-  Gemini API track separate but coordinated. Gemini is an intended track entry,
-  not the source of authoritative metrics; the dashboard must remain useful
-  without a Gemini API key or live network access.
-- Keep claims descriptive. Do not imply that a residual, school attribute, or
-  policy-era change causes an admission outcome.
+- Keep completed Phase 1 evidence and Phase 2 Dashboard Construction separate.
+  Do not claim Gemini eligibility while no user-facing Gemini capability exists.
+- Keep claims descriptive. Do not imply that race, ethnicity, school
+  characteristics, major, GPA, or policy caused an admission outcome.
 
 ## Agent skills
 
