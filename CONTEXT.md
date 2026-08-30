@@ -124,6 +124,10 @@ consistent residual across at least three observed years.
   README, so it must be labeled as provided and not presented as causal truth.
 - **Admission-rate residual**: actual admission rate minus expected admission
   rate, expressed in percentage points where both values are available.
+- **Positive gap**: a positive residual; the observed actual admission rate is
+  above the provided expected rate.
+- **Negative gap**: a negative residual; the observed actual admission rate is
+  below the provided expected rate.
 - **Residual year**: a fall year with enough actual, expected, and count data to
   calculate an admission-rate residual for the selected school-campus unit. In
   this dataset those years are 2017–2021 and 2023–2025; 2022 is a coverage gap,
