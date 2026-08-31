@@ -19,51 +19,63 @@ class GeminiRequestError(Exception):
 
 
 class GeminiClient:
-    """Minimal stateless Gemini Interactions API client."""
+    """Minimal stateless Gemini generateContent API client."""
 
-    def __init__(self, api_key: str, timeout: float = 8.0, model: Optional[str] = None) -> None:
+    def __init__(self, api_key: str, timeout: float = 20.0, model: Optional[str] = None) -> None:
         self.api_key = api_key
         self.timeout = timeout
         self.model = model or os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
 
     def generate(self, prompt: str) -> Any:
         payload = {
-            "model": self.model,
-            "input": prompt,
-            "store": False,
-            "response_format": {
-                "type": "text",
-                "mime_type": "application/json",
-                "schema": {
-                    "type": "object",
-                    "properties": {"explanation": {"type": "string"}},
-                    "required": ["explanation"],
-                },
-            },
-            "generation_config": {
-                "thinking_level": "low",
-                "max_output_tokens": 180,
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "thinkingConfig": {"thinkingLevel": "low"},
+                "maxOutputTokens": 280,
             },
         }
-        endpoint = "https://generativelanguage.googleapis.com/v1beta/interactions"
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
         body = json.dumps(payload).encode("utf-8")
         req = request.Request(endpoint, data=body, headers={"Content-Type": "application/json", "x-goog-api-key": self.api_key}, method="POST")
         try:
             with request.urlopen(req, timeout=self.timeout) as response:
                 document = json.loads(response.read().decode("utf-8"))
         except error.HTTPError as exc:
-            raise GeminiRequestError(f"HTTP {exc.code}") from None
-        except error.URLError:
+            try:
+                provider_body = exc.read()
+            except OSError:
+                provider_body = b""
+            raise GeminiRequestError(_safe_http_reason(exc.code, provider_body)) from None
+        except error.URLError as exc:
+            if isinstance(exc.reason, TimeoutError):
+                raise GeminiRequestError("request timed out") from None
             raise GeminiRequestError("network unavailable") from None
         except TimeoutError:
             raise GeminiRequestError("request timed out") from None
-        for step in reversed(document.get("steps", [])):
-            if step.get("type") != "model_output":
-                continue
-            for content in step.get("content", []):
-                if content.get("type") == "text":
-                    return content.get("text")
+
+        for candidate in document.get("candidates", []):
+            content = candidate.get("content", {})
+            for part in content.get("parts", []):
+                if part.get("text"):
+                    return part["text"]
         raise GeminiRequestError("empty provider response")
+
+
+def _safe_http_reason(status_code: int, body: bytes) -> str:
+    """Map provider failures to actionable, secret-free UI messages."""
+    try:
+        provider_status = json.loads(body.decode("utf-8")).get("error", {}).get("status", "")
+    except (AttributeError, UnicodeDecodeError, ValueError):
+        provider_status = ""
+    if status_code == 429 or provider_status == "RESOURCE_EXHAUSTED":
+        return "quota exceeded"
+    if status_code in {401, 403}:
+        return "API key rejected"
+    if status_code == 400:
+        return "invalid Gemini request"
+    if 500 <= status_code < 600:
+        return "Gemini service temporarily unavailable"
+    return f"HTTP {status_code}"
 
 
 def _read_local_environment(path: Path) -> Dict[str, str]:
@@ -99,12 +111,18 @@ def client_from_environment(dotenv_path: Optional[Path] = None) -> Optional[Gemi
 def build_prompt(snapshot: Dict[str, Any]) -> str:
     """Constrain the provider to the computed snapshot, not the source data."""
     return (
-        "Explain this selected UC admissions dashboard view in plain language. "
-        "Use only the JSON evidence below. Do not calculate new metrics, infer causes, "
-        "make fairness judgments, or estimate individual admission odds. Return exactly "
-        "a JSON object with one string field named explanation. Name the selected metric "
-        "and at least one reported group exactly as supplied. Copy any numbers from the "
-        "JSON only, using one decimal place for percentages and commas for counts.\n\n"
+        "Explain this selected UC admissions dashboard view in simple language using only "
+        "the computed JSON evidence below. Use short sentences, everyday words, and avoid "
+        "jargon. If a technical term is needed, explain it immediately in plain language. "
+        "Return exactly a JSON object with one string "
+        "field named explanation. Write five short labeled parts separated by blank lines: "
+        "Scope, What the graph shows, What stands out, How to read the counts, and Limit. "
+        "Explain both the horizontal bar chart and the 100% stacked area chart using the "
+        "visual definitions supplied in the JSON, and connect the charts to the count table. "
+        "Name the selected metric and at least one reported group exactly as supplied. "
+        "Copy numbers from the JSON only, using one decimal place for percentages and commas "
+        "for counts. Do not calculate new metrics, infer causes, make fairness judgments, "
+        "or estimate individual admission odds.\n\n"
         + json.dumps(snapshot, sort_keys=True)
     )
 
@@ -129,6 +147,7 @@ def _allowed_numeric_literals(snapshot: Dict[str, Any]) -> set[str]:
                 else:
                     allowed.add(f"{float(value):,.0f}")
     allowed.add(str(len(snapshot.get("rows", []))))
+    allowed.add("100%")
     return allowed
 
 
@@ -214,12 +233,19 @@ def _deterministic_ethnicity_explanation(
         if isinstance(row.get("metric_value"), (int, float))
     ]
     top_text = ""
+    bottom_text = ""
     if available_rows:
         top = max(available_rows, key=lambda row: row["metric_value"])
+        bottom = min(available_rows, key=lambda row: row["metric_value"])
         top_text = (
             f" {top['reported_group']} has the highest available {metric.lower()} "
             f"({top['metric_value']:.1%}) in this scope."
         )
+        if bottom["reported_group"] != top["reported_group"]:
+            bottom_text = (
+                f" {bottom['reported_group']} has the lowest available {metric.lower()} "
+                f"({bottom['metric_value']:.1%}) in this scope."
+            )
     metric_text = ""
     if metric == "Application share" and available_rows:
         selected_share = sum(row["metric_value"] for row in available_rows)
@@ -228,10 +254,23 @@ def _deterministic_ethnicity_explanation(
         metric_text = f" The count-derived admission rate is {metrics['admission_rate']:.1%}."
     elif metric == "Enrollment yield" and isinstance(metrics.get("yield_rate"), (int, float)):
         metric_text = f" The count-derived enrollment yield is {metrics['yield_rate']:.1%}."
+    finding_text = f"{top_text.strip()}{bottom_text}".strip()
+    if not finding_text:
+        finding_text = f"No selected group has an available value for {metric.lower()}."
     text = (
-        f"This {pathway} view covers {campus} in fall {year} and shows {metric} "
-        f"for {len(rows)} reported groups.{top_text}{metric_text} "
-        "This is descriptive aggregated evidence; it does not predict an individual outcome."
+        f"Scope: This {pathway} view covers {campus} in fall {year} and shows {metric} "
+        f"for {len(rows)} reported groups.\n\n"
+        f"What the graph shows: The horizontal bar chart compares {metric.lower()} "
+        f"for the selected groups. A longer bar means a higher percentage.\n\n"
+        "The 100% stacked area chart shows how the full applicant pool's composition changes "
+        "over time. Each year's stack adds up to 100%. A thicker section means that group "
+        "makes up a larger share of applicants. It does not show the total number of applicants.\n\n"
+        f"What stands out: {finding_text}\n\n"
+        f"How to read the counts: The table lists applicants, admits, and enrollees behind "
+        f"the selected metric. Admission rate is admits ÷ applicants, and enrollment yield "
+        f"is enrollees ÷ admits.{metric_text}\n\n"
+        "Limit: This is descriptive aggregated evidence; it does not explain causes or estimate "
+        "an individual's admission outcome."
     )
     return {"text": text, "source": "Deterministic offline fallback", "reason": reason}
 

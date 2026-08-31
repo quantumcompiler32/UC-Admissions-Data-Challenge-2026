@@ -18,6 +18,7 @@ from benchmark import (
     school_sites,
     transfer_major_benchmark,
 )
+from dashboard_charts import build_historical_admission_rate_chart
 
 
 @st.cache_data
@@ -77,9 +78,8 @@ def render_benchmark_result(result: Dict) -> None:
 
     annual = result["annual"].copy()
     if not annual.empty:
-        chart = annual.set_index("fall_term")[["admission_rate"]].rename(columns={"admission_rate": "Historical admission rate"})
-        if len(chart) >= 2:
-            st.line_chart(chart, height=300, color="#0759A8")
+        if len(annual) >= 2:
+            st.altair_chart(build_historical_admission_rate_chart(annual), use_container_width=True)
         table = annual.rename(
             columns={
                 "fall_term": "Fall year",

@@ -1,8 +1,9 @@
 import json
+from io import BytesIO
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from gemini import GeminiClient, deterministic_explanation, explain_view
+from gemini import GeminiClient, build_prompt, deterministic_explanation, explain_view
 from profile import build_redacted_payload, clear_profile_payload, explain_profile, is_prohibited_profile_request
 
 
@@ -62,27 +63,31 @@ def test_explanation_rejects_unsafe_individual_and_fairness_claims():
 
 
 def test_gemini_http_failure_exposes_safe_status_only():
-    with patch("gemini.request.urlopen", side_effect=HTTPError("https://example.invalid", 400, "bad key", {}, None)):
+    provider_body = json.dumps(
+        {"error": {"status": "RESOURCE_EXHAUSTED", "message": "quota exceeded for secret key"}}
+    ).encode("utf-8")
+    with patch(
+        "gemini.request.urlopen",
+        side_effect=HTTPError("https://example.invalid", 429, "quota", {}, BytesIO(provider_body)),
+    ):
         try:
             GeminiClient("replacement-not-used-in-test").generate("snapshot")
         except Exception as error:
-            assert str(error) == "HTTP 400"
+            assert str(error) == "quota exceeded"
             assert "replacement" not in str(error)
         else:
             raise AssertionError("expected provider failure")
 
 
-def test_gemini_interactions_request_is_stateless_and_extracts_text():
+def test_gemini_generate_content_request_is_stateless_and_extracts_text():
     document = {
-        "steps": [
+        "candidates": [
             {
-                "type": "model_output",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": '{"explanation":"The selected view is above the provided baseline."}',
-                    }
-                ],
+                "content": {
+                    "parts": [
+                        {"text": '{"explanation":"The selected view is above the provided baseline."}'}
+                    ]
+                }
             }
         ]
     }
@@ -91,14 +96,14 @@ def test_gemini_interactions_request_is_stateless_and_extracts_text():
 
     request_object = urlopen.call_args.args[0]
     payload = json.loads(request_object.data.decode("utf-8"))
-    assert request_object.full_url.endswith("/v1beta/interactions")
-    assert payload["store"] is False
-    assert payload["model"] == "gemini-3.7-flash"
-    assert payload["response_format"]["mime_type"] == "application/json"
-    assert payload["generation_config"] == {
-        "thinking_level": "low",
-        "max_output_tokens": 180,
-    }
+    assert request_object.full_url.endswith("/v1beta/models/gemini-3.7-flash:generateContent")
+    assert payload["contents"] == [{"parts": [{"text": "snapshot"}]}]
+    # Keep the request compatible with the deployed Gemini model. The prompt
+    # still asks for the tiny JSON envelope, while the local validator remains
+    # authoritative for accepting the response.
+    assert "responseFormat" not in payload["generationConfig"]
+    assert payload["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
+    assert payload["generationConfig"]["maxOutputTokens"] == 280
     assert raw == '{"explanation":"The selected view is above the provided baseline."}'
 
 
@@ -129,6 +134,59 @@ def test_ethnicity_view_fallback_is_useful_without_gemini():
     assert "Systemwide" in text
     assert "Admission rate" in text
     assert "42.0%" in text
+
+
+def test_ethnicity_fallback_explains_graphs_and_count_relationship():
+    snapshot = {
+        "scope": {
+            "pathway": "Freshman",
+            "campus": "Systemwide",
+            "year": 2025,
+            "metric": "Admission rate",
+        },
+        "metrics": {
+            "applicants": 1000,
+            "admits": 420,
+            "admission_rate": 0.42,
+            "enrollees": 210,
+            "yield_rate": 0.5,
+        },
+        "rows": [
+            {"reported_group": "Asian", "applicants": 600, "admits": 330, "enrollees": 150, "metric_value": 0.55},
+            {"reported_group": "White", "applicants": 400, "admits": 140, "enrollees": 60, "metric_value": 0.35},
+        ],
+    }
+
+    text = deterministic_explanation(snapshot)["text"]
+
+    assert "What the graph shows:" in text
+    assert "horizontal bar chart" in text
+    assert "100% stacked area chart" in text
+    assert "admits ÷ applicants" in text
+    assert "enrollees ÷ admits" in text
+    assert "Asian" in text and "55.0%" in text
+
+
+def test_prompt_requests_graph_and_table_interpretation():
+    prompt = build_prompt(
+        {
+            "scope": {"metric": "Admission rate"},
+            "metrics": {},
+            "rows": [{"reported_group": "Asian", "metric_value": 0.55}],
+            "visuals": {
+                "bar_chart": "horizontal bar chart",
+                "composition_chart": "100% stacked area chart",
+                "table": "count table",
+            },
+        }
+    )
+
+    assert "horizontal bar chart" in prompt
+    assert "100% stacked area chart" in prompt
+    assert "count table" in prompt
+    assert "simple language" in prompt
+    assert "short sentences" in prompt
+    assert "avoid jargon" in prompt
 
 
 def test_ethnicity_gemini_text_must_name_selected_evidence_and_use_known_numbers():

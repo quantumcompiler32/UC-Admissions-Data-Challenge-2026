@@ -1,5 +1,6 @@
 """Judge-facing Streamlit app for the UC admissions ethnicity question."""
 
+import html
 from numbers import Number
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import streamlit as st
 
 from benchmark import discipline_benchmark, load_source, transfer_major_benchmark
 from benchmark_ui import render_benchmark_result, render_historical_benchmark
+from dashboard_charts import build_application_composition_chart, build_metric_trend_chart
 from ethnicity_analysis import (
     METRIC_LABELS, aggregate_scope, campus_matrix, change_findings,
     filter_metrics, load_ethnicity_data, prepare_ethnicity_metrics,
@@ -103,6 +105,25 @@ def build_gemini_snapshot(
             "yield_rate": _snapshot_value(scoped_totals["yield_rate"]),
         },
         "rows": rows,
+        "visuals": {
+            "composition_chart": (
+                "100% stacked area chart: each year's stack is the full eight-category "
+                "applicant pool, and area thickness represents application share."
+            ),
+            "selected_metric_chart": (
+                f"Horizontal bar chart: each bar represents {METRIC_LABELS[selected_metric]} "
+                "for one selected reported group; a longer bar means a higher value."
+            ),
+            "count_table": (
+                "The table lists applicants, admits, and enrollees behind the count-derived "
+                "application share, admission rate, and enrollment yield."
+            ),
+        },
+        "definitions": {
+            "application_share": "applicants in a reported group divided by applicants across all eight reported categories",
+            "admission_rate": "admits divided by applicants for the same reported group",
+            "enrollment_yield": "enrollees divided by admits for the same reported group",
+        },
         "source": "Data/uc_admissions_summary_by_ethnicity.csv",
         "limitations": [
             "This is aggregated descriptive evidence, not individual applicant data.",
@@ -110,6 +131,22 @@ def build_gemini_snapshot(
             "Reported categories and missing counts are preserved as supplied.",
         ],
     }
+
+
+def _gemini_answer_html(result: dict, scope_label: str) -> str:
+    """Render the selected-view summary as a readable, escaped dashboard card."""
+    text = html.escape(result["text"])
+    text = text.replace("\n\n", "<br><br>").replace("\n", "<br>")
+    return (
+        '<div class="view-summary">'
+        '<div class="view-summary-header"><span class="view-summary-label">Summary</span>'
+        f'<span class="view-summary-scope">{html.escape(scope_label)}</span></div>'
+        f'<div class="view-summary-body">{text}</div></div>'
+    )
+
+
+# Keep the neutral name available for any local callers from the earlier UI.
+_summary_answer_html = _gemini_answer_html
 
 
 def render_gemini_explainer(
@@ -121,11 +158,11 @@ def render_gemini_explainer(
     selected_metric: str,
     selected_groups: list[str],
 ) -> None:
-    """Render a single judge-friendly Gemini action with an offline fallback."""
-    st.subheader("Explain this selected view")
+    """Render a neutral selected-view summary action with a safe fallback."""
+    st.subheader("View summary")
     st.caption(
-        "Gemini explains the selected aggregate scope; Python remains the "
-        "source of every displayed metric."
+        "Plain-language context for the selected aggregate. Dashboard metrics "
+        "remain calculated from the source counts."
     )
     snapshot = build_gemini_snapshot(
         active,
@@ -138,20 +175,29 @@ def render_gemini_explainer(
     with st.expander("Show the source snapshot", expanded=False):
         st.json(snapshot)
     provider = client_from_environment()
-    if provider is None:
-        st.caption("Offline fallback is ready. Set GEMINI_API_KEY in the environment to enable live Gemini.")
-    else:
-        st.caption("Gemini is configured. Click the button to generate a source-grounded explanation.")
-    if st.button("Explain this view", type="primary", key="explain_selected_view"):
-        with st.spinner("Preparing a grounded explanation…"):
+    if st.button("Summarize this view", type="primary", key="explain_selected_view"):
+        scope_label = (
+            f"{pathway_label} · {campus} · fall {selected_year} · "
+            f"{METRIC_LABELS[selected_metric]}"
+        )
+        loading_slot = st.empty()
+        loading_slot.markdown(
+            f'''<div class="gemini-loading" role="status" aria-live="polite">
+  <span class="gemini-mark" aria-hidden="true">✦</span>
+  <div><strong>Gemini is reading this view…</strong><span>{html.escape(scope_label)}</span></div>
+</div>''',
+            unsafe_allow_html=True,
+        )
+        with st.spinner("Preparing summary…"):
             result = explain_view(snapshot, provider)
-        if result["source"] == "Gemini generated interpretation":
-            st.success("Gemini-generated interpretation")
-        else:
-            st.info("Deterministic local explanation (Gemini unavailable)")
-        st.markdown(result["text"])
+        loading_slot.empty()
+        st.success("Summary ready")
+        st.markdown(
+            _gemini_answer_html(result, scope_label),
+            unsafe_allow_html=True,
+        )
         st.caption(
-            "Generated commentary is not an additional metric or prediction. "
+            "This summary is descriptive context, not an additional metric or prediction. "
             "The dashboard cards and selected-group snapshot are computed in Python."
         )
 
@@ -179,6 +225,17 @@ p,label,[data-testid="stCaptionContainer"] { color:var(--muted); }
 .pill { display:inline-block; background:var(--yellow); color:var(--ink); border:1px solid #dfa900; border-radius:999px; padding:.3rem .68rem; font-size:.78rem; font-weight:800; line-height:1.2; white-space:nowrap; margin:.25rem .2rem 0 0; }
 .finding-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem; min-height:112px; }
 .finding-card strong { color:var(--blue); }
+.view-summary { margin:.8rem 0 0; padding:1rem 1.1rem; background:#fff; border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:12px; }
+.view-summary-header { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem .75rem; margin-bottom:.65rem; }
+.view-summary-label { color:var(--blue); font-size:.76rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.view-summary-scope { color:var(--muted); font-size:.78rem; font-weight:700; }
+.view-summary-body { color:var(--ink); font-size:.98rem; line-height:1.7; }
+.gemini-loading { display:flex; align-items:center; gap:.75rem; margin:.8rem 0; padding:.8rem 1rem; background:linear-gradient(135deg,#fff 0%,#f2f8ff 100%); border:1px solid #c5dcf3; border-left:6px solid var(--blue); border-radius:12px; }
+.gemini-mark { display:grid; place-items:center; width:2rem; height:2rem; flex:0 0 2rem; color:#fff; background:linear-gradient(135deg,#4d8dff,#9b6cff 58%,#f5b6ff); border-radius:50%; font-size:1.35rem; font-weight:900; line-height:1; animation:gemini-pulse 1.25s ease-in-out infinite; }
+.gemini-loading strong { display:block; color:var(--ink); }
+.gemini-loading span:last-child { display:block; color:var(--muted); font-size:.78rem; }
+@keyframes gemini-pulse { 0%,100% { transform:scale(1); opacity:.86; } 50% { transform:scale(1.08); opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .gemini-mark { animation:none; } }
 @media (max-width:900px) {
   [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
   [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] { flex:1 1 calc(50% - .5rem) !important; min-width:min(100%,14rem); }
@@ -263,7 +320,7 @@ with overview_tab:
     systemwide = filter_metrics(metrics, entrant_level="freshman", campus="Systemwide")
     composition = systemwide.pivot(index="fall_term", columns="ethnicity", values="application_share")[GROUP_ORDER]
     st.markdown("#### How the application pool changed")
-    st.area_chart(composition, height=390)
+    st.altair_chart(build_application_composition_chart(composition), use_container_width=True)
     st.caption("This composition view includes all eight reported dataset categories and sums to 100% each year. International and Unknown are displayed categories, not racial identities.")
 
     st.markdown(f"#### {METRIC_LABELS[selected_metric]} by reported group in {selected_year}")
@@ -287,7 +344,7 @@ with trends_tab:
     st.caption(f"{pathway_label} · {campus} · selected groups. Use the sidebar to change the metric or population.")
     trend_rows = filter_metrics(metrics, entrant_level=entrant_level, campus=campus, ethnicities=selected_groups)
     trend = trend_rows.pivot(index="fall_term", columns="ethnicity", values=selected_metric)
-    st.line_chart(trend, height=470)
+    st.altair_chart(build_metric_trend_chart(trend, metric_label=METRIC_LABELS[selected_metric]), use_container_width=True)
     trend_table = trend.reset_index().rename(columns={"fall_term":"Fall year"})
     trend_table["Fall year"] = trend_table["Fall year"].astype(int).astype(str)
     trend_table = percentage_table(trend_table, selected_groups)
