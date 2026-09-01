@@ -34,6 +34,14 @@ majors, supplied GPA percentile ranges, and a non-predictive GPA comparison.
 The Historical Admissions Benchmark remains a secondary explorer for compatible
 aggregate selections. It never combines incompatible grains.
 
+The in-app Estimate Your Admission Odds section is an exploratory model
+comparison, not part of the core descriptive question. Freshman estimates use
+valid aggregate high-school applicant/admit counts plus applicant-GPA patterns;
+transfer estimates pool reported pathway/campus counts because transfer
+applicant-GPA history is unavailable. Both use weighted linear and
+grouped-binomial logistic regression with a time-based holdout. They must not
+be presented as individual admission predictors.
+
 ## Superseded contract
 
 The persistent school-campus residual question and Residual Observatory visual

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from dashboard_charts import (
+from uc_admissions.dashboard_charts import (
     build_application_composition_chart,
     build_historical_admission_rate_chart,
     build_metric_trend_chart,

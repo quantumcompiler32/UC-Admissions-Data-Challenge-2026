@@ -3,8 +3,8 @@ from io import BytesIO
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from gemini import GeminiClient, build_prompt, deterministic_explanation, explain_view
-from profile import build_redacted_payload, clear_profile_payload, explain_profile, is_prohibited_profile_request
+from uc_admissions.gemini import GeminiClient, build_prompt, deterministic_explanation, explain_view
+from archive.profile import build_redacted_payload, clear_profile_payload, explain_profile, is_prohibited_profile_request
 
 
 class FakeProvider:
@@ -67,7 +67,7 @@ def test_gemini_http_failure_exposes_safe_status_only():
         {"error": {"status": "RESOURCE_EXHAUSTED", "message": "quota exceeded for secret key"}}
     ).encode("utf-8")
     with patch(
-        "gemini.request.urlopen",
+        "uc_admissions.gemini.request.urlopen",
         side_effect=HTTPError("https://example.invalid", 429, "quota", {}, BytesIO(provider_body)),
     ):
         try:
@@ -91,7 +91,7 @@ def test_gemini_generate_content_request_is_stateless_and_extracts_text():
             }
         ]
     }
-    with patch("gemini.request.urlopen", return_value=FakeHTTPResponse(document)) as urlopen:
+    with patch("uc_admissions.gemini.request.urlopen", return_value=FakeHTTPResponse(document)) as urlopen:
         raw = GeminiClient("secret-value", model="gemini-3.7-flash").generate("snapshot")
 
     request_object = urlopen.call_args.args[0]

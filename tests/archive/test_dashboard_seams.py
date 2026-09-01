@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 
-from analysis import calculate_persistent_gaps, filter_gaps, gap_detail, snapshot_for_gap
+from archive.analysis import calculate_persistent_gaps, filter_gaps, gap_detail, snapshot_for_gap
 
 
 def _rows():

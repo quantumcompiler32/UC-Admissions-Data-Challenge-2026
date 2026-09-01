@@ -1,6 +1,6 @@
 import pandas as pd
 
-from benchmark import (
+from uc_admissions.benchmark import (
     DISCLAIMER,
     benchmark_types,
     discipline_benchmark,

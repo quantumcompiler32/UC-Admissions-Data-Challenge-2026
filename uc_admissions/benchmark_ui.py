@@ -8,7 +8,7 @@ from typing import Dict
 import pandas as pd
 import streamlit as st
 
-from benchmark import (
+from .benchmark import (
     DISCLAIMER,
     benchmark_types,
     discipline_benchmark,
@@ -18,7 +18,7 @@ from benchmark import (
     school_sites,
     transfer_major_benchmark,
 )
-from dashboard_charts import build_historical_admission_rate_chart
+from .dashboard_charts import build_historical_admission_rate_chart
 
 
 @st.cache_data

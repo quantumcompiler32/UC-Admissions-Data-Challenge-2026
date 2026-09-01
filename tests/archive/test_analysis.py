@@ -1,6 +1,6 @@
 import pandas as pd
 
-from analysis import audit_counts, calculate_persistent_gaps, campus_year_context
+from archive.analysis import audit_counts, calculate_persistent_gaps, campus_year_context
 
 
 def test_pooled_sign_conflict_is_excluded():

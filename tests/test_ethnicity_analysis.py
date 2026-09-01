@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from ethnicity_analysis import aggregate_scope, campus_matrix, change_findings, prepare_ethnicity_metrics
+from uc_admissions.ethnicity_analysis import aggregate_scope, campus_matrix, change_findings, prepare_ethnicity_metrics
 
 
 def _rows():

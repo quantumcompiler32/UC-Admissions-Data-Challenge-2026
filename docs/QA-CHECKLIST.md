@@ -15,8 +15,10 @@
 - [x] Historical benchmark incompatible grains remain separate.
 - [x] Gemini explanation has a source-bounded snapshot and deterministic fallback.
 - [x] Gemini responses are schema-checked and prohibited individual-admission claims are rejected.
+- [x] Admission prediction models use a 2025 time holdout, grouped counts, and exclude unavailable counts.
+- [x] In-app odds estimator exposes probability, odds, actual counts, and baseline comparison.
 - [x] Full pytest suite passes.
-- [x] Streamlit AppTest loads every top-level section without exceptions.
+- [x] Streamlit AppTest loads the dashboard and in-app odds estimator without exceptions.
 
 ## Human review before judging
 
@@ -26,6 +28,8 @@
 - [ ] Check small-group counts before narrating the largest changes.
 - [ ] Exercise freshman, transfer, each metric, campus, group, and year controls.
 - [ ] Exercise first-year discipline, Berkeley transfer major, and GPA compare.
+- [ ] Exercise Estimate Your Admission Odds for freshman/transfer, campus, GPA, and target-year selections.
+- [ ] Confirm the estimator is described as aggregate historical estimation, never a personal chance.
 - [ ] With `GEMINI_API_KEY` set, click “Explain this view” and confirm the generated label, source snapshot, and limitation text.
 - [ ] Without `GEMINI_API_KEY`, click “Explain this view” and confirm the deterministic fallback.
 - [ ] Rehearse that International and Unknown are source categories.

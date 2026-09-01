@@ -38,7 +38,7 @@ analysis, data validation, reproducibility, and technical correctness.
 Before changing anything:
 
 1. Read AGENTS.md, docs/TEAM.md, CONTEXT.md, the issue and all comments,
-   docs/GRILL-SUMMARY.md, the relevant ADRs, UC-Admissions-Data-Challenge.md,
+   docs/GRILL-SUMMARY.md, the relevant ADRs, docs/UC-Admissions-Data-Challenge.md,
    and the Data README.
 2. Inspect all skills available in your agent environment. Announce and use
    every relevant skill for data analysis, testing, debugging, or
@@ -77,7 +77,7 @@ is merged into main.
 Before changing anything:
 
 1. Read AGENTS.md, docs/TEAM.md, CONTEXT.md,
-   UC-Admissions-Data-Challenge.md, docs/research/ui-ux-dashboard-skills.md,
+   docs/UC-Admissions-Data-Challenge.md, docs/research/ui-ux-dashboard-skills.md,
    docs/GRILL-SUMMARY.md, and issue #2 with all comments.
 2. Inspect all available skills. Announce and use relevant dashboard,
    Streamlit, visualization, prototyping, accessibility, browser-verification,
@@ -114,7 +114,7 @@ limitations, QA, and presentation support. Begin only after issue #1 is merged.
 Before changing anything:
 
 1. Read AGENTS.md, docs/TEAM.md, CONTEXT.md,
-   UC-Admissions-Data-Challenge.md, docs/GRILL-SUMMARY.md,
+   docs/UC-Admissions-Data-Challenge.md, docs/GRILL-SUMMARY.md,
    docs/REFERENCE-DECK.md, and issue #3 with all comments.
 2. Inspect available skills. Announce and use relevant research,
    documentation, accessibility, Streamlit, and testing skills. Follow each

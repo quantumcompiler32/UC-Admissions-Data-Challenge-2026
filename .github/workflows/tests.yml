@@ -31,4 +31,9 @@ jobs:
         run: python -m pytest -q
 
       - name: Compile application modules
-        run: python -m py_compile app.py ethnicity_analysis.py benchmark.py benchmark_ui.py
+        run: >-
+          python -m py_compile app.py
+          uc_admissions/admission_models.py uc_admissions/benchmark.py
+          uc_admissions/benchmark_ui.py uc_admissions/dashboard_charts.py
+          uc_admissions/ethnicity_analysis.py uc_admissions/gemini.py
+          archive/analysis.py archive/gemini_adapter.py archive/profile.py

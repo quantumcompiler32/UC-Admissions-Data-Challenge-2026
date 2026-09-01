@@ -22,7 +22,12 @@ Target length: 2–3 minutes.
    show the labeled Gemini interpretation; otherwise show the deterministic
    fallback. Point out that the displayed dashboard cards and selected-group
    snapshot counts and rates remain authoritative.
-9. End in Methods with the count-derived formulas and the descriptive,
+9. If asked to show the model work, open **Estimate Your Admission Odds**,
+   select a pathway, campus, target year, and GPA, and point to the two model
+   estimates, the observed aggregate rate, and the validation table. Explain
+   that freshman GPA is an aggregate signal, transfer GPA is not used, and the
+   result is never a personal admission chance.
+10. End in Methods with the count-derived formulas and the descriptive,
    non-causal boundary.
 
 Do not spend judge time on the Historical explorer unless asked. It is a useful

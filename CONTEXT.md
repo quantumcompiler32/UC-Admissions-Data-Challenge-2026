@@ -89,3 +89,10 @@ criteria into a personal result.
   without Gemini.
 - The former persistent residual dashboard is superseded and retained only as
   archived analysis code, tests, notebook, research notes, and ADR history.
+- The in-app `Estimate Your Admission Odds` section is an exploratory aggregate
+  model view. Freshman estimates use aggregate applicant-GPA patterns from the
+  high-school modeling table; transfer estimates pool reported pathway/campus
+  counts because transfer applicant-GPA history is unavailable. Both compare
+  weighted linear regression with grouped-binomial logistic regression on a
+  time-based holdout and report aggregate probabilities and odds only; neither
+  estimates an individual student's admission chance.

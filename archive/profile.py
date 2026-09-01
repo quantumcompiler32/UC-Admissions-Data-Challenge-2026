@@ -4,7 +4,7 @@ import json
 import re
 from typing import Any, Dict, Optional, Protocol
 
-from gemini import _valid_text
+from uc_admissions.gemini import _valid_text
 
 
 CONTACT_PATTERNS = (

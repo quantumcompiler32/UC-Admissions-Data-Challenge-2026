@@ -2,7 +2,7 @@ import os
 
 from unittest.mock import patch
 
-from gemini import GeminiClient, client_from_environment
+from uc_admissions.gemini import GeminiClient, client_from_environment
 
 
 def test_client_reads_a_local_dotenv_without_overriding_process_environment(tmp_path):

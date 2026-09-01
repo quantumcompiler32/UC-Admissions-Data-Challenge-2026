@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from gemini_adapter import (
+from archive.gemini_adapter import (
     GeminiProvider,
     explain_view,
     load_api_key,

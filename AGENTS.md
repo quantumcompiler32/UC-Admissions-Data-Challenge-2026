@@ -6,7 +6,7 @@ Challenge 2026 team. Before making a proposal or changing a file, read:
 1. `AGENTS.md` for collaboration rules.
 2. `docs/TEAM.md` for people, role ownership, and agent handoffs.
 3. `CONTEXT.md` for settled domain language and current product decisions.
-4. `UC-Admissions-Data-Challenge.md` for the challenge brief and data
+4. `docs/UC-Admissions-Data-Challenge.md` for the challenge brief and data
    limitations.
 5. `docs/research/ui-ux-dashboard-skills.md` for dashboard design guidance.
 6. `docs/EVENT-PLAN.md` for the three-track event plan and handoff sequence.

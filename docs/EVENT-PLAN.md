@@ -28,7 +28,7 @@
 5. Use the Historical explorer only as a secondary utility.
 6. Keep formulas, counts, category definitions, and limitations visible.
 7. Test desktop, 320-pixel width, clean checkout, and deployed URL.
-8. Rehearse the two-minute speech in `docs/PRESENTATION-SPEECH.md`.
+8. Rehearse the judge-facing demo in `docs/DEMO.md`.
 
 ## Readiness gate
 

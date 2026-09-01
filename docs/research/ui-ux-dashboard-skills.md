@@ -1,7 +1,7 @@
 # UI/UX Skills and Workflow for a Polished UC Admissions Dashboard
 
 **Research date:** 2026-08-30
-**Scope:** A practical, time-boxed approach to designing a distinctive, credible, accessible dashboard for the UC Admissions Data Challenge. The local [challenge brief](../../UC-Admissions-Data-Challenge.md) is treated as the product context; external links below are the evidence base.
+**Scope:** A practical, time-boxed approach to designing a distinctive, credible, accessible dashboard for the UC Admissions Data Challenge. The local [challenge brief](../UC-Admissions-Data-Challenge.md) is treated as the product context; external links below are the evidence base.
 
 ## Executive synthesis
 

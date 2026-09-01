@@ -1,25 +1,34 @@
 """Judge-facing Streamlit app for the UC admissions ethnicity question."""
 
 import html
+import time
 from numbers import Number
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
-from benchmark import discipline_benchmark, load_source, transfer_major_benchmark
-from benchmark_ui import render_benchmark_result, render_historical_benchmark
-from dashboard_charts import build_application_composition_chart, build_metric_trend_chart
-from ethnicity_analysis import (
+from uc_admissions.admission_models import (
+    PredictionRun,
+    ProfilePredictionRun,
+    build_pathway_prediction_run,
+    build_profile_prediction_run,
+)
+from uc_admissions.benchmark import discipline_benchmark, load_source, transfer_major_benchmark
+from uc_admissions.benchmark_ui import render_benchmark_result, render_historical_benchmark
+from uc_admissions.dashboard_charts import build_application_composition_chart, build_metric_trend_chart
+from uc_admissions.ethnicity_analysis import (
     METRIC_LABELS, aggregate_scope, campus_matrix, change_findings,
     filter_metrics, load_ethnicity_data, prepare_ethnicity_metrics,
 )
-from gemini import client_from_environment, explain_view
+from uc_admissions.gemini import client_from_environment, explain_view
 
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "Data"
 ETHNICITY_PATH = DATA_DIR / "uc_admissions_summary_by_ethnicity.csv"
+PROFILE_MODEL_PATH = DATA_DIR / "bay_area_modeling_table.csv"
 GROUP_ORDER = ["African American", "American Indian", "Asian", "Hispanic/Latino(a)", "International", "Pacific Islander", "Unknown", "White"]
+SUMMARY_RESPONSE_DELAY_SECONDS = 1.2
 
 
 @st.cache_data
@@ -32,12 +41,37 @@ def load_benchmark_source(benchmark_type: str) -> pd.DataFrame:
     return load_source(DATA_DIR, benchmark_type)
 
 
+@st.cache_data
+def load_profile_source() -> pd.DataFrame:
+    return pd.read_csv(PROFILE_MODEL_PATH)
+
+
+@st.cache_resource
+def load_profile_prediction_run(holdout_year: int) -> ProfilePredictionRun:
+    return build_profile_prediction_run(
+        load_profile_source(),
+        holdout_year=holdout_year,
+    )
+
+
+@st.cache_resource
+def load_pathway_prediction_run(holdout_year: int) -> PredictionRun:
+    return build_pathway_prediction_run(
+        load_ethnicity_metrics(),
+        holdout_year=holdout_year,
+    )
+
+
 def format_count(value):
     return "Unavailable" if value is None or pd.isna(value) else f"{value:,.0f}"
 
 
 def format_rate(value):
     return "Unavailable" if value is None or pd.isna(value) else f"{value:.1%}"
+
+
+def format_odds(value):
+    return "Unavailable" if value is None or pd.isna(value) else f"{value:.2f}:1"
 
 
 def percentage_table(frame: pd.DataFrame, columns) -> pd.DataFrame:
@@ -189,6 +223,7 @@ def render_gemini_explainer(
             unsafe_allow_html=True,
         )
         with st.spinner("Preparing summary…"):
+            time.sleep(SUMMARY_RESPONSE_DELAY_SECONDS)
             result = explain_view(snapshot, provider)
         loading_slot.empty()
         st.success("Summary ready")
@@ -384,6 +419,221 @@ with gpa_tab:
         major = cols[1].selectbox("Named major", sorted(compatible["major"].unique()), key="gpa_major")
         gpa_result = transfer_major_benchmark(source, discipline, major)
     render_benchmark_result(gpa_result)
+
+with st.container(border=True):
+    st.subheader("Estimate Your Admission Odds")
+    st.markdown(
+        "Enter a pathway, campus, target year, and GPA to see what the historical "
+        "aggregate models estimate for a matching scenario."
+    )
+    st.warning(
+        "This is a model-based estimate from aggregate UC records, not your personal "
+        "chance of admission or a guarantee. The app does not contain individual applicant records."
+    )
+
+    input_columns = st.columns(3)
+    odds_pathway = input_columns[0].selectbox(
+        "Applicant pathway",
+        ["Freshman", "Transfer"],
+        key="odds_pathway",
+    )
+    target_year = input_columns[1].selectbox(
+        "Target fall year",
+        [int(year) for year in years[1:]],
+        index=len(years[1:]) - 1,
+        key="odds_target_year",
+    )
+    if odds_pathway == "Freshman":
+        profile_source = load_profile_source()
+        odds_campuses = [
+            "Universitywide",
+            *sorted(
+                campus_name
+                for campus_name in profile_source["campus"].dropna().unique()
+                if campus_name != "Universitywide"
+            ),
+        ]
+    else:
+        transfer_campuses = metrics.loc[
+            metrics["entrant_level"] == "transfer", "campus"
+        ].dropna().unique()
+        odds_campuses = [
+            "Systemwide",
+            *sorted(campus_name for campus_name in transfer_campuses if campus_name != "Systemwide"),
+        ]
+    odds_campus = input_columns[2].selectbox(
+        "Target campus",
+        odds_campuses,
+        key="odds_campus",
+    )
+    applicant_gpa = st.number_input(
+        "Applicant GPA",
+        min_value=0.0,
+        max_value=4.5,
+        value=3.80,
+        step=0.01,
+        format="%.2f",
+        help="For freshmen, this is compared with aggregate applicant GPA patterns. "
+        "For transfers, the available pathway data does not support GPA adjustment.",
+        key="odds_gpa",
+    )
+
+    if odds_pathway == "Freshman":
+        prediction_run = load_profile_prediction_run(target_year)
+        estimate = prediction_run.estimate(odds_campus, gpa=applicant_gpa)
+        campus_holdout = prediction_run.holdout_predictions[
+            prediction_run.holdout_predictions["campus"] == odds_campus
+        ]
+        observed_applicants = float(campus_holdout["applicants"].sum())
+        observed_admits = float(campus_holdout["admits"].sum())
+        observed_rate = observed_admits / observed_applicants
+        if not (
+            prediction_run.gpa_range[0]
+            <= applicant_gpa
+            <= prediction_run.gpa_range[1]
+        ):
+            st.info(
+                f"That GPA is outside the model's training range of "
+                f"{prediction_run.gpa_range[0]:.2f}–{prediction_run.gpa_range[1]:.2f}. "
+                "Treat the estimate as an extrapolation."
+            )
+        st.caption(
+            f"Freshman model training years: {prediction_run.train_years[0]}–"
+            f"{prediction_run.train_years[-1]}. GPA range in training data: "
+            f"{prediction_run.gpa_range[0]:.2f}–{prediction_run.gpa_range[1]:.2f}."
+        )
+        st.info(
+            "Freshman GPA is an aggregate applicant-GPA signal from high-school rows; "
+            "it is not an individual transcript or a calibrated personal probability."
+        )
+    else:
+        prediction_run = load_pathway_prediction_run(target_year)
+        estimate = prediction_run.segment(
+            "transfer",
+            odds_campus,
+            "All reported groups",
+        )
+        observed_applicants = float(estimate["applicants"])
+        observed_admits = float(estimate["admits"])
+        observed_rate = float(estimate["actual_rate"])
+        st.caption(
+            f"Transfer model training years: {prediction_run.train_years[0]}–"
+            f"{prediction_run.train_years[-1]}."
+        )
+        st.info(
+            "Transfer GPA is shown so the form stays consistent, but the tracked transfer "
+            "data has no applicant-GPA history. GPA does not change this transfer estimate."
+        )
+
+    result_cards = st.columns(4)
+    result_cards[0].metric(
+        "Estimated probability",
+        format_rate(estimate["logistic_probability"]),
+    )
+    result_cards[1].metric(
+        "Modeled admission odds",
+        format_odds(estimate["logistic_odds"]),
+    )
+    result_cards[2].metric(
+        "Linear estimate",
+        format_rate(estimate["linear_prediction"]),
+    )
+    result_cards[3].metric(
+        f"Observed {target_year} rate",
+        format_rate(observed_rate),
+    )
+    st.caption(
+        "Odds are modeled admitted-to-not-admitted odds. For example, 1.00:1 means the "
+        "model estimates one admission for every one non-admission in the modeled rate."
+    )
+
+    st.subheader("Selected aggregate context")
+    context_table = pd.DataFrame(
+        [
+            {
+                "Pathway": odds_pathway,
+                "Campus": odds_campus,
+                "Target year": target_year,
+                "Applicant GPA input": applicant_gpa,
+                "Applicants in observed aggregate": observed_applicants,
+                "Admits in observed aggregate": observed_admits,
+                "Observed admission rate": observed_rate,
+            }
+        ]
+    )
+    st.dataframe(
+        context_table,
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Applicant GPA input": st.column_config.NumberColumn(format="%.2f"),
+            "Applicants in observed aggregate": st.column_config.NumberColumn(format="%d"),
+            "Admits in observed aggregate": st.column_config.NumberColumn(format="%d"),
+            "Observed admission rate": st.column_config.NumberColumn(format="%.1f%%"),
+        },
+    )
+
+    st.subheader(f"How the models performed on {target_year}")
+    validation_table = pd.DataFrame(
+        [
+            {
+                "Model": "Linear regression",
+                "Weighted MAE": prediction_run.metrics["linear"]["weighted_mae"],
+                "Weighted RMSE": prediction_run.metrics["linear"]["weighted_rmse"],
+                "Log loss": None,
+                "Brier score": None,
+            },
+            {
+                "Model": "Logistic regression",
+                "Weighted MAE": prediction_run.metrics["logistic"]["weighted_mae"],
+                "Weighted RMSE": prediction_run.metrics["logistic"]["weighted_rmse"],
+                "Log loss": prediction_run.metrics["logistic"]["weighted_log_loss"],
+                "Brier score": prediction_run.metrics["logistic"]["brier_score"],
+            },
+            {
+                "Model": "Historical baseline",
+                "Weighted MAE": prediction_run.metrics["baseline"]["weighted_mae"],
+                "Weighted RMSE": prediction_run.metrics["baseline"]["weighted_rmse"],
+                "Log loss": None,
+                "Brier score": None,
+            },
+        ]
+    )
+    st.dataframe(
+        validation_table,
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Weighted MAE": st.column_config.NumberColumn(format="%.1f%%"),
+            "Weighted RMSE": st.column_config.NumberColumn(format="%.1f%%"),
+            "Log loss": st.column_config.NumberColumn(format="%.3f"),
+            "Brier score": st.column_config.NumberColumn(format="%.3f"),
+        },
+    )
+    st.caption(
+        "These holdout errors are validation evidence for aggregate predictions, not a "
+        "measure of an individual's admission odds. Lower error is better."
+    )
+
+    with st.expander("How this estimate is built"):
+        if odds_pathway == "Freshman":
+            st.markdown(
+                "The freshman models use aggregate high-school applicant counts, admit "
+                "counts, applicant GPA, campus, year, and campus-specific time trends. "
+                "Linear regression predicts a rate; grouped-binomial logistic regression "
+                "predicts a probability and converts it to odds."
+            )
+        else:
+            st.markdown(
+                "The transfer model pools the reported ethnicity rows into supplied "
+                "pathway/campus/year totals before modeling. It uses year, campus, pathway, "
+                "and time-trend features. It does not use GPA because the tracked transfer "
+                "history does not include applicant GPA."
+            )
+        st.caption(
+            f"{prediction_run.dropped_rows} rows with unavailable or invalid counts were "
+            "excluded; missing values were never treated as zero."
+        )
 
 with benchmark_tab:
     render_historical_benchmark(DATA_DIR)
